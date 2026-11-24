@@ -382,12 +382,12 @@ html.gated body>header,html.gated body>main{display:none}
    1) 把 Firebase 專案設定貼在這裡（Firebase 主控台 → 專案設定 → 你的應用程式 → SDK 設定）
    ============================================================ */
 const FIREBASE_CONFIG = {
-  apiKey: "",
-  authDomain: "",
-  projectId: "",
-  storageBucket: "",
-  messagingSenderId: "",
-  appId: ""
+  apiKey: "AIzaSyC59lwppZKtk35Ph5Sqz-cqrLokXgyDKQ8",
+  authDomain: "design-request-a1f44.firebaseapp.com",
+  projectId: "design-request-a1f44",
+  storageBucket: "design-request-a1f44.firebasestorage.app",
+  messagingSenderId: "744162123009",
+  appId: "1:744162123009:web:e7f2ad0289d96d3aae4f00"
 };
 /* ============================================================ */
 
@@ -410,6 +410,7 @@ const FIREBASE_CONFIG = {
   const ready = (async () => {
     if (!FIREBASE_CONFIG.projectId){ gate('尚未完成設定', '請在 index.html 的 FIREBASE_CONFIG 貼上 Firebase 專案設定。'); return null; }
     if (!KEY){ gate('請使用專屬連結開啟', '這個頁面只能透過設計窗口提供的專屬連結進入。請向設計窗口索取連結。'); return null; }
+    if (typeof firebase === 'undefined'){ gate('無法載入資料服務', '請確認網路連線，或公司網路是否封鎖了 gstatic.com / googleapis.com，再重新整理頁面。'); return null; }
     firebase.initializeApp(FIREBASE_CONFIG);
     const auth = firebase.auth(); const fs = firebase.firestore();
     await new Promise(r => { const off = auth.onAuthStateChanged(() => { off(); r(); }); });
