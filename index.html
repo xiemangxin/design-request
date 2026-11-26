@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='100 32 190 320'><path fill='%23111' fill-rule='evenodd' d='M120 112A75 70 0 0 1 195 42A75 70 0 0 1 270 112V218H185V290H270V342H185A65 65 0 0 1 120 277ZM185 190V106A14 14 0 0 1 213 106V190Z'/></svg>">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'><path fill='%23231815' fill-rule='evenodd' d='M200 0A200 200 0 1 1 200 400A200 200 0 1 1 200 0ZM265.5,323.2h-67.6c-35-.3-63.6-26.3-63.8-57.9v-129.4c.2-32.7,29.7-59.2,65.7-59.2s65.5,26.6,65.7,59.2v75.4s0,3.6,0,3.6h-80.6v50.3c0,17.2,15.6,31,34.7,31,0,0,0,0,.2,0h25.2s16.9,0,16.9,0h3.6v26.9ZM184.9,188h29.8v-72.6c0-7.2-6.7-13.1-14.9-13.1s-14.9,5.9-14.9,13.1v72.6Z'/></svg>"><path fill='%23111' fill-rule='evenodd' d='M120 112A75 70 0 0 1 195 42A75 70 0 0 1 270 112V218H185V290H270V342H185A65 65 0 0 1 120 277ZM185 190V106A14 14 0 0 1 213 106V190Z'/></svg>">
 <title>商發部設計需求單</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -60,7 +60,7 @@ button{font:inherit;color:inherit}
 .top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--surface);border-bottom:1px solid var(--line)}
 .top-in{display:flex;align-items:center;gap:12px 20px;padding-block:10px;flex-wrap:wrap}
 .brand{display:flex;align-items:center;gap:12px;min-width:0}
-.logo{display:block;height:34px;width:auto;flex:none;color:var(--ink)}
+.logo{display:block;height:36px;width:36px;flex:none;color:var(--ink)}
 .gate-card .logo{height:44px}
 .cmyk i{display:block;width:9px;height:9px;border-radius:2px}
 .brand h1{font-family:var(--f-display);font-size:17px;font-weight:800;letter-spacing:.02em}
@@ -367,7 +367,7 @@ html.gated body>header,html.gated body>main{display:none}
 <header class="top">
   <div class="wrap top-in">
     <div class="brand">
-      <svg class="logo" viewBox="120 42 150 300" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" d="M120 112A75 70 0 0 1 195 42A75 70 0 0 1 270 112V218H185V290H270V342H185A65 65 0 0 1 120 277ZM185 190V106A14 14 0 0 1 213 106V190Z"/></svg>
+      <svg class="logo" viewBox="0 0 400 400" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" d="M200 0A200 200 0 1 1 200 400A200 200 0 1 1 200 0ZM265.5,323.2h-67.6c-35-.3-63.6-26.3-63.8-57.9v-129.4c.2-32.7,29.7-59.2,65.7-59.2s65.5,26.6,65.7,59.2v75.4s0,3.6,0,3.6h-80.6v50.3c0,17.2,15.6,31,34.7,31,0,0,0,0,.2,0h25.2s16.9,0,16.9,0h3.6v26.9ZM184.9,188h29.8v-72.6c0-7.2-6.7-13.1-14.9-13.1s-14.9,5.9-14.9,13.1v72.6Z"/></svg>
       <div><h1>商發部設計需求單</h1><small id="brand-sub">視覺設計需求窗口</small></div>
     </div>
     <nav class="tabs" id="tabs" aria-label="頁面"></nav>
@@ -419,7 +419,7 @@ const FIREBASE_CONFIG = {
   const wrapErr = e => ({code: mapCode(e && e.code), message: (e && e.message) || ''});
   function gate(title, msg){
     const g = document.createElement('div'); g.className = 'gate';
-    g.innerHTML = '<div class="gate-card"><svg class="logo" viewBox="120 42 150 300" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" d="M120 112A75 70 0 0 1 195 42A75 70 0 0 1 270 112V218H185V290H270V342H185A65 65 0 0 1 120 277ZM185 190V106A14 14 0 0 1 213 106V190Z"/></svg><h2></h2><p></p></div>';
+    g.innerHTML = '<div class="gate-card"><svg class="logo" viewBox="0 0 400 400" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" d="M200 0A200 200 0 1 1 200 400A200 200 0 1 1 200 0ZM265.5,323.2h-67.6c-35-.3-63.6-26.3-63.8-57.9v-129.4c.2-32.7,29.7-59.2,65.7-59.2s65.5,26.6,65.7,59.2v75.4s0,3.6,0,3.6h-80.6v50.3c0,17.2,15.6,31,34.7,31,0,0,0,0,.2,0h25.2s16.9,0,16.9,0h3.6v26.9ZM184.9,188h29.8v-72.6c0-7.2-6.7-13.1-14.9-13.1s-14.9,5.9-14.9,13.1v72.6Z"/></svg><h2></h2><p></p></div>';
     g.querySelector('h2').textContent = title; g.querySelector('p').textContent = msg;
     const mount = () => { document.body.appendChild(g); document.documentElement.classList.add('gated'); };
     if (document.body) mount(); else document.addEventListener('DOMContentLoaded', mount);
