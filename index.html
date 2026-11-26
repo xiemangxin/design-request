@@ -1211,7 +1211,7 @@ function busyRows(){
   const out = [];
   for (const [id, b] of S.busy){
     const status = STATUS[b.status] ? b.status : 'On going';
-    out.push({id:'busy-' + id, busy:true, r:{no:b.no || id, title:b.title, dueDate:b.dueDate, category:b.category, company:b.company, channels:[], urgency:null}, t:{status, stage:b.stage}, k:null, status});
+    out.push({id:'busy-' + id, busy:true, r:{no:b.no || id, title:b.title, dueDate:b.dueDate, category:b.category, company:b.company, channels:[], urgency:null}, t:{status, stage:b.stage, deliveredDate:b.deliveredDate || ''}, k:null, status});
   }
   return out;
 }
@@ -1546,12 +1546,23 @@ async function writeManual(id, doc){
   try { await enqueue('kpi/' + id, () => S.db.doc('kpi/' + id).set(full)); await syncBusy(id, full); return true; }
   catch(e){ handleWriteError(e); return false; }
 }
+async function syncAllBusy(){
+  if (writeBlocked()) return;
+  const msg = $('.js-sync-msg'); const list = [...S.kpi.entries()].filter(([, k]) => k.manual);
+  let n = 0;
+  for (const [id, k] of list){
+    try { await syncBusy(id, k); n++; if (msg) msg.textContent = `同步中 ${n} / ${list.length}`; }
+    catch(e){ handleWriteError(e); break; }
+  }
+  for (const id of [...S.busy.keys()]) if (!S.kpi.has(id)) { try { await S.db.doc('busy/' + id).delete(); } catch(_){} }
+  if (msg) msg.textContent = `已同步 ${n} 筆`; toast('已同步到進度看板');
+}
 function busyDoc(k){
   const r = k.snapshot || {};
-  return {no:r.no || '', title:r.title || '', dueDate:r.dueDate || '', category:r.category || '', company:r.company || '', status:k.status || 'On going', stage:k.stage || '', updatedAt:new Date().toISOString()};
+  return {no:r.no || '', title:r.title || '', dueDate:r.dueDate || '', category:r.category || '', company:r.company || '', status:k.status || 'On going', stage:k.stage || '', deliveredDate:k.deliveredDate || '', updatedAt:new Date().toISOString()};
 }
 async function syncBusy(id, k){
-  const show = k.manual && isActive(statusOf(null, {status:k.status}));
+  const show = k.manual && !k.hidePublic && k.status !== 'Cancel' && !(k.include === false && (k.snapshot || {}).category === 'internal');
   if (show) await enqueue('busy/' + id, () => S.db.doc('busy/' + id).set(busyDoc(k)));
   else if (S.busy.has(id)) await enqueue('busy/' + id, () => S.db.doc('busy/' + id).delete());
 }
@@ -1576,6 +1587,7 @@ function manualForm(x){
       <div class="field"><label for="m-due">完稿日（預定）</label><input type="date" id="m-due" value="${esc(r.dueDate || '')}"><span class="hint">有填才會計入準時率。</span></div>
       <div class="field"><label for="m-delivered">完成日</label><input type="date" id="m-delivered" value="${esc(k.deliveredDate || '')}"></div>
     </div>
+    <label class="check"><input type="checkbox" id="m-public" ${k.hidePublic ? '' : 'checked'}><span>在進度看板公開（只顯示名稱、類別、業務單位、日期與狀態）</span></label>
     ${kpiFieldsHTML(r, k, late)}
     <div class="dw-actions"><button type="submit" class="btn primary">儲存</button><span class="grow"></span>${x ? `<button type="button" class="btn danger ${S.armedDelete ? 'armed' : ''}" data-act="delete">${S.armedDelete ? '確定刪除？再按一次' : '刪除這筆紀錄'}</button>` : ''}</div>
   </form>`;
@@ -1593,7 +1605,7 @@ async function saveManual(ev){
   const ps = prev.snapshot || {};
   const snapshot = {no:ps.no || id, title, proposal:'', company:v('m-bu'), category:v('m-cat'), channels:ps.channels || [], qty:Math.max(1, Math.round(num(v('m-qty'), 1))),
     planner:v('m-planner'), briefDate:'', dueDate:v('m-due'), launchDate:'', createdAt:ps.createdAt || new Date().toISOString(), urgency:null, leadDays:null, offSchedule:false, rating:null, edits:0};
-  const doc = {...prev, source:prev.source || 'manual', status:st, stage:v('m-stage'), deliveredDate:delivered, snapshot, ...readKpiFields()};
+  const doc = {...prev, source:prev.source || 'manual', status:st, stage:v('m-stage'), deliveredDate:delivered, hidePublic:!$('#m-public')?.checked, snapshot, ...readKpiFields()};
   if (await writeManual(id, doc)){ S.drawerId = id; S.drawerMode = 'view'; S.drawerDirty = false; toast('已儲存'); renderDrawer(); renderCurrent(); }
 }
 function hash5(str){ let h = 0x811c9dc5; for (const ch of str){ h ^= ch.codePointAt(0); h = Math.imul(h, 16777619) >>> 0; } return h.toString(36).toUpperCase().padStart(5, '0').slice(-5); }
@@ -2018,6 +2030,9 @@ function renderSetup(){
           <p class="hint">匯出全部資料（需求、進度、KPI、設定）成一個 JSON 檔，請存在自己的電腦或 OneDrive，不要上傳到 GitHub。匯入會覆蓋相同編號的資料。</p>
           <div class="dw-actions"><button class="btn sm" data-act="backup-export">匯出備份</button><label class="btn sm" for="backup-file">匯入備份</label><input type="file" id="backup-file" accept=".json,application/json" hidden></div>
           <span class="hint js-backup-msg"></span>
+          <h3 class="fs-h" style="margin-top:8px">進度看板同步</h3>
+          <p class="hint">把工作台裡「自行登錄」的工作（含已完成）同步到進度看板。看板只公開名稱、類別、業務單位、日期與狀態，KPI 紀錄與備註不會公開。個別工作可在編輯時取消「在進度看板公開」。</p>
+          <div class="dw-actions"><button class="btn sm" data-act="busy-sync">同步到進度看板</button><span class="hint js-sync-msg"></span></div>
           <h3 class="fs-h" style="margin-top:8px">等級規則</h3>
           <dl class="kv">
             <dt>普通件</dt><dd>資料提供日到完稿日 D+7 以上（不含假日）</dd>
@@ -2142,6 +2157,7 @@ document.addEventListener('click', ev => {
   }
   if (act === 'open'){ if (ev.target.closest('select')) return; openDrawer(a.dataset.id); }
   else if (act === 'close') closeDrawer();
+  else if (act === 'busy-sync') syncAllBusy();
   else if (act === 'copy-share') copyText(window.DR.shareLink(a.dataset.view));
   else if (act === 'backup-export') exportBackup();
   else if (act === 'manual-new') openDrawer(null, 'manual-new');
