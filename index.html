@@ -8,7 +8,7 @@
 <title>商發部設計需求單</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=Jost:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=JetBrains+Mono:wght@400;600&family=Noto+Sans+TC:wght@400;500;700&display=swap">
 <style>
 /* Layout: a production job-ticket — form on the left, a perforated "ticket stub" on the right
    that live-computes the case level (D+n working days) and the weekly intake cutoff. */
@@ -442,89 +442,25 @@ details.conf[open]>summary::before{transform:rotate(90deg)}
   .score .hero{font-size:56px}
   .hb{grid-template-columns:84px minmax(0,1fr)}
 }
-/* ===== Soft theme: warm paper, soft depth, pill controls, terracotta accent ===== */
-:root{
-  --bg:#efe9e3; --surface:#f8f4f0; --surface-2:#ece5de; --ink:#2b2622; --ink-2:#6b615a; --ink-3:#978c84;
-  --line:#e4dcd4; --line-2:#d5cbc2;
-  --accent:#a8523c; --accent-hover:#8f4430; --accent-ink:#ffffff; --accent-soft:#f1e1d9;
-  --series:#c0614a; --grid:#e5dcd3; --load:#c0614a;
-  --crit-ink:#a8382f; --warn-ink:#8a5a00; --good-ink:#2f7a3a;
-  --soft:0 1px 0 rgba(255,255,255,.75) inset,0 14px 34px -18px rgba(110,72,52,.32),0 2px 8px -4px rgba(110,72,52,.14);
-  --soft-sm:0 1px 0 rgba(255,255,255,.7) inset,0 6px 16px -10px rgba(110,72,52,.35);
-  --sunk:inset 0 2px 5px rgba(110,72,52,.10),inset 0 -1px 0 rgba(255,255,255,.6);
-  --shadow:0 24px 60px -18px rgba(80,50,35,.35);
-  --f-display:"Jost","Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
-}
-@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
-  --bg:#1b1816; --surface:#25201d; --surface-2:#2d2723; --ink:#f1ebe5; --ink-2:#c7bcb2; --ink-3:#978b81;
-  --line:#3a322d; --line-2:#4a413a;
-  --accent:#e08a71; --accent-hover:#eaa08a; --accent-ink:#1b1816; --accent-soft:#3b2922;
-  --series:#d9826b; --grid:#352e29; --load:#d9826b;
-  --crit-ink:#f19588; --warn-ink:#f2c46a; --good-ink:#7fd08b;
-  --soft:0 1px 0 rgba(255,255,255,.04) inset,0 14px 34px -18px rgba(0,0,0,.7),0 2px 8px -4px rgba(0,0,0,.5);
-  --soft-sm:0 1px 0 rgba(255,255,255,.04) inset,0 6px 16px -10px rgba(0,0,0,.7);
-  --sunk:inset 0 2px 5px rgba(0,0,0,.35),inset 0 -1px 0 rgba(255,255,255,.03);
-  --shadow:0 24px 60px -18px rgba(0,0,0,.75); color-scheme:dark; } }
-:root[data-theme="dark"]{
-  --bg:#1b1816; --surface:#25201d; --surface-2:#2d2723; --ink:#f1ebe5; --ink-2:#c7bcb2; --ink-3:#978b81;
-  --line:#3a322d; --line-2:#4a413a;
-  --accent:#e08a71; --accent-hover:#eaa08a; --accent-ink:#1b1816; --accent-soft:#3b2922;
-  --series:#d9826b; --grid:#352e29; --load:#d9826b;
-  --crit-ink:#f19588; --warn-ink:#f2c46a; --good-ink:#7fd08b;
-  --soft:0 1px 0 rgba(255,255,255,.04) inset,0 14px 34px -18px rgba(0,0,0,.7),0 2px 8px -4px rgba(0,0,0,.5);
-  --soft-sm:0 1px 0 rgba(255,255,255,.04) inset,0 6px 16px -10px rgba(0,0,0,.7);
-  --sunk:inset 0 2px 5px rgba(0,0,0,.35),inset 0 -1px 0 rgba(255,255,255,.03);
-  --shadow:0 24px 60px -18px rgba(0,0,0,.75); color-scheme:dark; }
-body{letter-spacing:.01em}
-.top{background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:saturate(1.2) blur(14px);-webkit-backdrop-filter:saturate(1.2) blur(14px);border-bottom:1px solid color-mix(in srgb,var(--line) 70%,transparent)}
-body::before{background:var(--bg)}
-.brand h1{font-family:var(--f-display);font-weight:500;letter-spacing:.06em}
-.page-head h2{font-family:var(--f-display);font-weight:500;font-size:30px;letter-spacing:.08em}
-.tab{border-radius:999px;padding:7px 14px}
-.tab[aria-current="page"]{background:var(--surface);color:var(--accent);box-shadow:var(--soft-sm);font-weight:600}
-.who{border-radius:999px;background:var(--surface);border-color:transparent;box-shadow:var(--soft-sm)}
-.card,.list,.tablewrap,.sbox,.notice,.stub,.capcell,details.conf{border-radius:22px;border:1px solid color-mix(in srgb,var(--surface) 60%,var(--line));box-shadow:var(--soft);background:var(--surface)}
-.capcell{border-radius:24px}
-.private{border-radius:18px;border:none;background:var(--surface-2);box-shadow:var(--sunk)}
-.lsum div,.dcell{border-radius:14px}
-.lsum div{border:none;box-shadow:var(--soft-sm)}
-.notice.info{background:color-mix(in srgb,var(--accent) 7%,var(--surface))}
-.notice.warn{background:color-mix(in srgb,var(--st-warn) 12%,var(--surface))}
-.sbox span,.stub-k,.cap-k,.fs-title,th,.lhead,.dw-sec>h4{text-transform:uppercase;letter-spacing:.14em;font-size:11.5px;font-weight:600}
-.sbox b,.capcell b,.dn-big,.score .hero,.ind-v,.sugbox b{font-family:var(--f-display);font-weight:400;letter-spacing:.02em}
-.capcell b{font-size:46px}
-.btn{border-radius:999px;border:1px solid transparent;background:var(--surface);box-shadow:var(--soft-sm);padding:9px 18px;font-weight:500;letter-spacing:.04em}
-.btn:hover{background:var(--surface);box-shadow:0 1px 0 rgba(255,255,255,.75) inset,0 10px 22px -12px rgba(110,72,52,.45);color:var(--accent)}
-.btn.primary{background:var(--accent);color:var(--accent-ink);box-shadow:0 10px 22px -12px color-mix(in srgb,var(--accent) 80%,transparent),inset 0 1px 0 rgba(255,255,255,.25)}
-.btn.primary:hover{background:var(--accent-hover);color:var(--accent-ink)}
-.btn.sm{padding:6px 14px}
-.btn.danger{color:var(--crit-ink)}
-input[type=text],input[type=date],input[type=number],input[type=url],input[type=search],input[type=time],select,textarea{border-radius:14px;border:1px solid transparent;background:var(--surface-2);box-shadow:var(--sunk)}
-input:focus,select:focus,textarea:focus{outline:2px solid color-mix(in srgb,var(--accent) 55%,transparent);outline-offset:1px;border-color:transparent;background:var(--surface)}
-.seg button,.pchip,.preset,.chip,.tag{border-radius:999px}
-.seg button{border:none;background:var(--surface);box-shadow:var(--soft-sm);padding:6px 14px}
-.seg button[aria-pressed="true"],.pchip.on,.chip:has(input:checked){background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
-.chip,.pchip,.preset{background:var(--surface);border-color:var(--line-2)}
-.cat{border-radius:18px;border-color:transparent;background:var(--surface);box-shadow:var(--soft-sm)}
-.cat:has(input:checked){background:var(--accent-soft);box-shadow:inset 0 0 0 1.5px var(--accent)}
-.check input{accent-color:var(--accent)}
-.stub-head{background:var(--accent);color:var(--accent-ink);letter-spacing:.2em}
-.perf::before,.perf::after{background:var(--bg)}
-.row{border-bottom-color:color-mix(in srgb,var(--line) 70%,transparent)}
-.row:hover{background:color-mix(in srgb,var(--accent) 5%,var(--surface))}
-.list .lhead{border-bottom-color:var(--line)}
-.sharebar,.meter{background:var(--surface-2);box-shadow:var(--sunk)}
-.sharebar i{background:var(--load)}
-.meter i{background:linear-gradient(90deg,color-mix(in srgb,var(--load) 75%,var(--surface)),var(--load))}
-.drawer{border-radius:26px 0 0 26px;background:var(--surface)}
-.dw-head{background:color-mix(in srgb,var(--surface) 90%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
-.scrim{background:color-mix(in srgb,#2b1d16 35%,transparent);backdrop-filter:blur(2px)}
-.toast{border-radius:999px;background:var(--ink);padding:10px 20px}
-.badge{background:var(--st-crit)}
-.capcell.over{animation-name:breatheSoft}
-@keyframes breatheSoft{0%,100%{box-shadow:var(--soft),0 0 0 0 color-mix(in srgb,var(--load) 0%,transparent)}50%{box-shadow:var(--soft),0 0 0 6px color-mix(in srgb,var(--load) 22%,transparent)}}
-.udot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--st-crit);margin-right:8px;vertical-align:middle;box-shadow:0 0 0 3px color-mix(in srgb,var(--st-crit) 18%,transparent)}
-@media (max-width:640px){.page-head h2{font-size:24px}.capcell b{font-size:38px}.drawer{border-radius:0}}
+details.more{border-top:1px solid var(--line);padding-top:12px}
+details.more>summary{cursor:pointer;font-size:13.5px;font-weight:700;color:var(--ink-2);list-style:none;display:flex;gap:6px 10px;align-items:baseline;flex-wrap:wrap}
+details.more>summary::-webkit-details-marker{display:none}
+details.more>summary::before{content:"▸";color:var(--ink-3);transition:transform .15s}
+details.more[open]>summary::before{transform:rotate(90deg)}
+details.more>summary .muted{font-weight:500;font-size:12px}
+.more-body{display:grid;gap:14px;margin-top:14px}
+.js-stage-hint:empty{display:none}
+.field>.stepper,.field>.segctl{justify-self:start}
+.wk-prog{margin-top:6px}
+.wk-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;padding:0;overflow:hidden}
+.wk-step{display:grid;gap:8px;align-content:start;padding:16px 18px;border-right:1px solid var(--line);min-width:0}
+.wk-step:last-child{border-right:0}
+.wk-step .stub-k{display:flex;gap:8px;align-items:center}
+.wk-step .stub-k i{font-style:normal;display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--ink);color:var(--surface);font-size:11px;letter-spacing:0}
+.wk-step.ok .stub-k i{background:var(--st-good)}
+.wk-step p{font-size:13.5px;color:var(--ink-2)}
+@media (max-width:820px){ .wk-steps{grid-template-columns:minmax(0,1fr)} .wk-step{border-right:0;border-bottom:1px solid var(--line)} .wk-step:last-child{border-bottom:0} }
+.udot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--st-crit);margin-right:7px;vertical-align:middle;position:relative;top:-1px;box-shadow:0 0 0 3px color-mix(in srgb,var(--st-crit) 16%,transparent)}
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
 </style>
 <style>
@@ -898,7 +834,7 @@ function rulesText(){ return (S.settings.rules || []).map(r => String(r).replace
 const S = {
   db:null, user:null, downloads:null, uid:null, isOwner:false, canWrite:null, readOnly:false,
   identityKnown:false, conn:'loading', loaded:{requests:false, track:false},
-  requests:new Map(), track:new Map(), kpi:new Map(), busy:new Map(), load:new Map(), loadconf:{meetingHours:4, leaves:[]}, isManager:false, pendingAdj:[], loadEdit:false, capDay:null, capConfOpen:false, triage:null,
+  requests:new Map(), track:new Map(), kpi:new Map(), busy:new Map(), load:new Map(), loadconf:{meetingHours:4, leaves:[]}, isManager:false, pendingAdj:[], loadEdit:false, capDay:null, capConfOpen:false, capFineOpen:false, moreOpen:false, triage:null,
   settings:{...DEFAULT_SETTINGS}, kpiconf:structuredClone(DEFAULT_KPICONF),
   view:null, demo:false, demoData:null,
   board:{status:'active', mine:false, q:'', sort:null}, desk:{status:'active', q:'', sort:null},
@@ -947,7 +883,7 @@ function handleWriteError(e){
 /* ---------------- nav & notices ---------------- */
 function renderNav(){
   const tabs = [['new','填寫需求'],['board','進度看板']];
-  if (S.isOwner) tabs.push(['desk','工作台'],['weekly','週報'],['capacity','量能'],['kpi','KPI 結算'],['setup','設定']);
+  if (S.isOwner) tabs.push(['desk','工作台'],['weekly','週五結算'],['capacity','量能'],['kpi','KPI 結算'],['setup','設定']);
   else if (S.isManager) tabs.push(['capacity','量能']);
   // 待評估時數的紅點：只在設計本人、量能資料讀完後計算，避免載入中誤報
   const pend = S.isOwner && !S.demo && S.loaded.load && S.loaded.requests && S.loaded.kpi ? triageQueue().length : 0;
@@ -1565,12 +1501,14 @@ async function quickStatus(id, st){
   const x = findRow(id);
   if (x && x.manual){
     const doc = {...x.k, status:st}; if (st === 'Done' && !doc.deliveredDate) doc.deliveredDate = fmtD(today0());
+    if (st === 'On going' && x.status === 'Open' && !doc.stage) doc.stage = '初稿製作中';
     if (await writeManual(id, doc)){ toast(`已改為「${STATUS[st].zh}」`); loadStatusSync(id, st); } else renderCurrent();
     return;
   }
   const patch = {status:st};
   const prev = S.track.get(id) || {};
   if (st === 'Done' && !prev.deliveredDate) patch.deliveredDate = fmtD(today0());
+  if (st === 'On going' && x && x.status === 'Open' && !prev.stage) patch.stage = '初稿製作中';
   const ok = await writeTrack(id, patch);
   if (ok){ if (st === 'Done') await writeKpi(id, {}); toast(`已改為「${STATUS[st].zh}」`); loadStatusSync(id, st); }
   else renderCurrent();
@@ -1634,15 +1572,16 @@ function renderDrawer(){
   const dw = $('#drawer');
   if (S.drawerMode === 'import'){ dw.innerHTML = importDrawer(); return; }
   if (S.drawerMode === 'triage'){ dw.innerHTML = triageHTML(); return; }
-  if (S.drawerMode === 'manual-new'){ dw.innerHTML = `<div class="dw-head"><div style="display:grid;gap:4px"><span class="mono muted" style="font-size:12px">NEW LOG</span><h3 id="dw-title">自行登錄工作</h3></div><button class="btn sm x" data-act="close">關閉</button></div><div class="dw-body">${manualForm(null)}</div>`; return; }
+  if (S.drawerMode === 'manual-new'){ dw.innerHTML = `<div class="dw-head"><div style="display:grid;gap:4px"><span class="mono muted" style="font-size:12px">NEW LOG</span><h3 id="dw-title">自行登錄工作</h3></div><button class="btn sm x" data-act="close">關閉</button></div><div class="dw-body">${manualForm(null)}</div>`; drawerSync(); return; }
   const x = findRow(S.drawerId);
   if (!x){ dw.innerHTML = `<div class="dw-head"><h3 id="dw-title">找不到這張需求</h3><button class="btn sm x" data-act="close">關閉</button></div><div class="dw-body"><p class="muted">它可能已被刪除。</p></div>`; return; }
   const head = `<div class="dw-head"><div style="display:grid;gap:4px;min-width:0"><span class="mono muted" style="font-size:12px">${esc(x.r.no || x.id)}</span><h3 id="dw-title">${esc(x.r.title)}</h3><div style="display:flex;gap:6px;flex-wrap:wrap">${statusPill(x.status)} ${urgPill(x.r.urgency)}</div></div><button class="btn sm x" data-act="close">關閉</button></div>`;
   let body;
-  if (S.isOwner) body = `<section class="dw-sec" id="load-card">${loadCardHTML(x)}</section>` + (x.manual ? manualForm(x) : ownerDrawer(x));
+  if (S.isOwner) body = (x.manual ? manualForm(x) : ownerDrawer(x)).replace('<!--LOADCARD-->', `<section class="dw-sec" id="load-card">${loadCardHTML(x)}</section>`);
   else if (S.drawerMode === 'edit') body = editDrawer(x);
   else body = viewerDrawer(x);
   dw.innerHTML = head + `<div class="dw-body">${body}</div>`;
+  if (S.isOwner) drawerSync();
 }
 function viewerDrawer(x){
   const mine = S.uid && x.r.createdBy === S.uid;
@@ -1714,28 +1653,71 @@ async function saveEdit(ev){
     S.drawerMode = 'view'; S.drawerDirty = false; renderDrawer();
   } catch(e){ handleWriteError(e); }
 }
+const DONE_STAGES = ['完稿','正式站上線'];
 function ownerDrawer(x){
   const t = x.t; const k = x.k || {}; const r = x.r;
-  const late = t.deliveredDate && r.dueDate && t.deliveredDate > r.dueDate;
   return `
   ${x.gone ? `<div class="notice warn"><b>需求已刪除</b><span>需求單已被刪除，以下是 KPI 紀錄保存的內容。</span></div>` : ''}
   ${r.rating ? `<div class="notice info"><b>企劃評分 ${'★'.repeat(num(r.rating))}</b><span>${esc(r.ratingNote || '')}</span></div>` : ''}
-  <form id="own-form" class="dw-sec" novalidate>
+  <form id="own-form" class="dw-sec" novalidate data-prev="${esc(x.status)}">
     <h4>製作進度 <span class="tag">企劃看得到</span></h4>
     <div class="row2">
       <div class="field"><label for="o-status">狀態</label>${x.status === 'Withdrawn' ? statusPill('Withdrawn') : `<select id="o-status">${OWNER_STATUSES.map(s => `<option value="${s}" ${s === x.status ? 'selected' : ''}>${STATUS[s].zh}</option>`).join('')}</select>`}</div>
       <div class="field"><label for="o-stage">製作階段</label><select id="o-stage">${STAGES.map(g => `<option value="${esc(g)}" ${g === (t.stage || '') ? 'selected' : ''}>${g ? esc(g) : '—'}</option>`).join('')}</select></div>
-      <div class="field"><label for="o-eta">預計交件日</label><input type="date" id="o-eta" value="${esc(t.eta || '')}"></div>
-      <div class="field"><label for="o-delivered">交件日</label><input type="date" id="o-delivered" value="${esc(t.deliveredDate || '')}"><span class="hint">改為「完成」時自動填今天。</span></div>
     </div>
+    <div class="js-stage-hint"></div>
+    <div class="field js-del-f" hidden><label for="o-delivered">交件日</label><input type="date" id="o-delivered" value="${esc(t.deliveredDate || '')}"><span class="hint">改為「完成」時自動帶入今天，可修改。</span></div>
     <div class="field"><label for="o-reply">給企劃的回覆</label><textarea id="o-reply" rows="2" placeholder="例：初稿 12/2 提供，需補商品去背圖">${esc(t.reply || '')}</textarea></div>
     <div class="field"><label for="o-link">交件位置</label><textarea id="o-link" rows="2" class="mono" style="font-size:13px" spellcheck="false" placeholder="網芳路徑或雲端連結，多個位置請換行&#10;例：\\\\everrich.net\\nas14\\…\\@完稿">${esc(t.deliverLink || '')}</textarea></div>
-
-    ${kpiFieldsHTML(r, k, late)}
+    ${kpiCoreHTML(k)}
+    ${moreHTML('own-more', '預計交件日、難度、工作量點數、實際工時、考核統計、私人備註', [t.eta, ...kpiMoreFilled(k)], `
+      <div class="field"><label for="o-eta">預計交件日 <span class="tag">企劃看得到</span></label><input type="date" id="o-eta" value="${esc(t.eta || '')}"><span class="hint">和完稿日不同時才需要填。</span></div>
+      ${kpiMoreHTML(r, k)}`)}
     <div class="dw-actions"><button type="submit" class="btn primary">儲存</button><span class="grow"></span>
       <button type="button" class="btn danger ${S.armedDelete ? 'armed' : ''}" data-act="delete">${S.armedDelete ? '確定刪除？再按一次' : '刪除這張需求'}</button></div>
   </form>
+  <!--LOADCARD-->
   <section class="dw-sec"><h4>需求內容</h4>${detailHTML(x)}</section>`;
+}
+function moreHTML(id, list, filled, inner){
+  const n = filled.filter(Boolean).length;
+  return `<details class="more" id="${id}" ${S.moreOpen ? 'open' : ''}><summary>更多欄位 <span class="muted">${esc(list)}</span>${n ? ` <span class="tag">已填 ${n} 項</span>` : ''}</summary><div class="more-body">${inner}</div></details>`;
+}
+const kpiMoreFilled = k => [k.difficulty && k.difficulty !== 'normal', k.points != null && k.points !== '', k.hours != null && k.hours !== '', k.include === false, k.note];
+// 是否逾期：有交件日看交件日，沒有就看今天
+function lateOf(due, delivered, st){
+  if (!due || st === 'Cancel' || st === 'Withdrawn') return false;
+  return (delivered || fmtD(today0())) > due;
+}
+// 抽屜裡的連動：完成→帶交件日、進行中→帶階段、完稿階段→提示改完成、逾期才顯示延遲歸因
+function drawerSync(changed){
+  const f = $('#own-form') || $('#man-form'); if (!f) return;
+  const P = f.id === 'own-form' ? 'o' : 'm';
+  const x = S.drawerId ? findRow(S.drawerId) : null;
+  const stEl = $('#' + P + '-status'); const st = stEl ? stEl.value : (x ? x.status : 'Open');
+  const stg = $('#' + P + '-stage'); const del = $('#' + P + '-delivered');
+  if (changed === 'status'){
+    const prev = f.dataset.prev || '';
+    if (st === 'Done' && del && !del.value){ del.value = fmtD(today0()); del.dataset.auto = '1'; }
+    if (st !== 'Done' && del && del.dataset.auto){ del.value = ''; delete del.dataset.auto; }
+    if (st === 'On going' && prev === 'Open' && stg && !stg.value) stg.value = '初稿製作中';
+    f.dataset.prev = st;
+  }
+  if (changed === 'delivered' && del) delete del.dataset.auto;
+  const delF = $('.js-del-f', f); if (delF) delF.hidden = !(st === 'Done' || (del && del.value));
+  const hint = $('.js-stage-hint', f);
+  if (hint){
+    const g = stg ? stg.value : '';
+    hint.innerHTML = DONE_STAGES.includes(g) && isActive(st) && stEl ? `<div class="notice info"><b>已到「${esc(g)}」</b><span>要直接改為「完成」嗎？交件日會帶入今天並儲存。</span><button type="button" class="btn sm primary" data-act="mark-done">改為完成</button></div>` : '';
+  }
+  const due = P === 'm' ? ($('#m-due')?.value || '') : (x ? x.r.dueDate || '' : '');
+  const late = lateOf(due, del ? del.value : '', st);
+  const df = $('.js-delay-f', f);
+  if (df){
+    df.hidden = !late;
+    const h = $('.js-delay-hint', f);
+    if (h) h.innerHTML = late ? `<b style="color:var(--crit-ink)">${del && del.value ? '交件日晚於' : '已超過'}完稿日（${esc(showD(due))}）。</b>歸因為需求端或不可抗力的延遲，不計入準時率分母。` : '';
+  }
 }
 async function saveOwner(ev){
   ev.preventDefault();
@@ -1765,17 +1747,22 @@ function autoHint(r, k){
   const ap = autoPoints(r, k);
   return `自動計算：${esc(CAT[r.category]?.zh || '')} ${num(S.kpiconf.points?.[r.category], 1)} 點 × ${num(r.qty, 1)} ${esc(CAT[r.category]?.unit || '件')} × 難度 = <b>${ap}</b>；留空則用自動值。`;
 }
-function kpiFieldsHTML(r, k, late){
-  const ap = autoPoints(r, k);
+function kpiCoreHTML(k){
   return `<div class="private dw-sec">
       <h4>KPI 紀錄 <span class="tag">僅你可見</span></h4>
-      <div class="field"><span class="lbl">難度</span><div class="segctl">${Object.entries(DIFF).map(([kk, l]) => `<label><input type="radio" name="o-diff" value="${kk}" ${(k.difficulty || 'normal') === kk ? 'checked' : ''}>${l} ×${num(S.kpiconf.difficulty?.[kk], 1)}</label>`).join('')}</div></div>
       <div class="row2">
         <div class="field"><span class="lbl">修改次數</span><div class="stepper"><button type="button" data-act="step" data-d="-1" aria-label="減少">−</button><output id="o-rev">${num(k.revisions)}</output><button type="button" data-act="step" data-d="1" aria-label="增加">＋</button></div></div>
-        <div class="field"><label for="o-points">工作量點數</label><input type="number" id="o-points" step="0.5" min="0" value="${k.points ?? ''}" placeholder="自動 ${ap}"><span class="hint js-auto">${autoHint(r, k)}</span></div>
+        <div class="field js-delay-f" hidden><label for="o-delay">延遲歸因</label><select id="o-delay">${Object.entries(DELAY).map(([kk, l]) => `<option value="${kk}" ${(k.delayCause || '') === kk ? 'selected' : ''}>${l}</option>`).join('')}</select><span class="hint js-delay-hint"></span></div>
       </div>
+    </div>`;
+}
+function kpiMoreHTML(r, k){
+  const ap = autoPoints(r, k);
+  return `<div class="private dw-sec">
+      <h4>KPI 細項 <span class="tag">僅你可見</span></h4>
+      <div class="field"><span class="lbl">難度</span><div class="segctl">${Object.entries(DIFF).map(([kk, l]) => `<label><input type="radio" name="o-diff" value="${kk}" ${(k.difficulty || 'normal') === kk ? 'checked' : ''}>${l} ×${num(S.kpiconf.difficulty?.[kk], 1)}</label>`).join('')}</div></div>
       <div class="row2">
-        <div class="field"><label for="o-delay">延遲歸因</label><select id="o-delay">${Object.entries(DELAY).map(([kk, l]) => `<option value="${kk}" ${(k.delayCause || '') === kk ? 'selected' : ''}>${l}</option>`).join('')}</select><span class="hint">${late ? '<b style="color:var(--crit-ink)">交件日晚於完稿日。</b>' : ''}歸因為需求端或不可抗力的延遲，不計入準時率分母。</span></div>
+        <div class="field"><label for="o-points">工作量點數</label><input type="number" id="o-points" step="0.5" min="0" value="${k.points ?? ''}" placeholder="自動 ${ap}"><span class="hint js-auto">${autoHint(r, k)}</span></div>
         <div class="field"><label for="o-hours">實際工時（小時）</label><input type="number" id="o-hours" step="0.5" min="0" value="${k.hours ?? ''}" placeholder="選填"></div>
       </div>
       <label class="check"><input type="checkbox" id="o-include" ${k.include === false ? '' : 'checked'}><span>列入半年考核統計</span></label>
@@ -1788,7 +1775,7 @@ function readKpiFields(){
   return {
     difficulty:($('input[name="o-diff"]:checked')?.value) || 'normal',
     revisions:num($('#o-rev')?.textContent), points: pts === '' ? null : num(pts),
-    delayCause:v('o-delay'), hours: v('o-hours') === '' ? null : num(v('o-hours')),
+    delayCause:$('.js-delay-f')?.hidden ? '' : v('o-delay'), hours: v('o-hours') === '' ? null : num(v('o-hours')),
     include:!!$('#o-include')?.checked, note:v('o-note'),
   };
 }
@@ -1828,29 +1815,34 @@ async function syncBusy(id, k){
 }
 function manualForm(x){
   const r = x ? x.r : {category:'ads', qty:1, company:'', planner:'', title:'', dueDate:''};
-  const k = x ? x.k : {};
+  const k = x ? (x.k || {}) : {};
   const st = x ? x.status : 'Done';
   const bus = [...new Set([...(S.settings.companies || []), r.company].filter(Boolean))];
-  const late = k.deliveredDate && r.dueDate && k.deliveredDate > r.dueDate;
-  return `<form id="man-form" class="dw-sec" novalidate>
-    <p class="hint">沒有經過需求單的工作（主管交辦、內部專案、例行更新）在這裡登錄。未結案時，進度看板會顯示它的名稱、類別、完稿日與狀態，讓企劃知道你的排程；KPI 紀錄與備註只有你看得到。</p>
+  return `<form id="man-form" class="dw-sec" novalidate data-prev="${esc(st)}">
+    ${x ? '' : '<p class="hint">沒有經過需求單的工作（主管交辦、內部專案、例行更新）在這裡登錄。未結案時，進度看板會顯示它的名稱、類別、完稿日與狀態；KPI 紀錄與備註只有你看得到。</p>'}
     <div class="field"><label class="req" for="m-title">工作項目</label><input type="text" id="m-title" value="${esc(r.title)}" placeholder="例：免稅LINE推播完稿*3"></div>
     <div class="row2">
       <div class="field"><label for="m-cat">類別</label><select id="m-cat">${CATS.map(c => `<option value="${c.k}" ${c.k === r.category ? 'selected' : ''}>${esc(c.zh)}</option>`).join('')}</select></div>
       <div class="field"><label for="m-qty">數量</label><input type="number" id="m-qty" min="1" step="1" value="${num(r.qty, 1)}"></div>
-      <div class="field"><label for="m-bu">業務單位</label><input type="text" id="m-bu" list="m-bu-list" value="${esc(r.company)}" placeholder="選擇或輸入"><datalist id="m-bu-list">${bus.map(b => `<option value="${esc(b)}"></option>`).join('')}</datalist></div>
-      <div class="field"><label for="m-planner">需求來源／企劃</label><input type="text" id="m-planner" value="${esc(r.planner)}" placeholder="選填"></div>
-    </div>
-    <div class="row2">
       <div class="field"><label for="m-status">狀態</label><select id="m-status">${OWNER_STATUSES.map(s2 => `<option value="${s2}" ${s2 === st ? 'selected' : ''}>${STATUS[s2].zh}</option>`).join('')}</select></div>
       <div class="field"><label for="m-stage">製作階段</label><select id="m-stage">${STAGES.map(g => `<option value="${esc(g)}" ${g === (k.stage || '') ? 'selected' : ''}>${g ? esc(g) : '—'}</option>`).join('')}</select></div>
-      <div class="field"><label for="m-due">完稿日（預定）</label><input type="date" id="m-due" value="${esc(r.dueDate || '')}"><span class="hint">有填才會計入準時率。</span></div>
-      <div class="field"><label for="m-delivered">完成日</label><input type="date" id="m-delivered" value="${esc(k.deliveredDate || '')}"></div>
     </div>
-    <label class="check"><input type="checkbox" id="m-public" ${k.hidePublic ? '' : 'checked'}><span>在進度看板公開（只顯示名稱、類別、業務單位、日期與狀態）</span></label>
-    ${kpiFieldsHTML(r, k, late)}
+    <div class="js-stage-hint"></div>
+    <div class="row2">
+      <div class="field"><label for="m-due">完稿日（預定）</label><input type="date" id="m-due" value="${esc(r.dueDate || '')}"><span class="hint">有填才會計入準時率與量能。</span></div>
+      <div class="field js-del-f" hidden><label for="m-delivered">完成日</label><input type="date" id="m-delivered" value="${esc(k.deliveredDate || '')}"><span class="hint">改為「完成」時自動帶入今天。</span></div>
+    </div>
+    ${kpiCoreHTML(k)}
+    ${moreHTML('man-more', '業務單位、需求來源、看板公開、難度、點數、工時、私人備註', [r.company, r.planner, k.hidePublic, ...kpiMoreFilled(k)], `
+      <div class="row2">
+        <div class="field"><label for="m-bu">業務單位</label><input type="text" id="m-bu" list="m-bu-list" value="${esc(r.company)}" placeholder="選擇或輸入"><datalist id="m-bu-list">${bus.map(b => `<option value="${esc(b)}"></option>`).join('')}</datalist></div>
+        <div class="field"><label for="m-planner">需求來源／企劃</label><input type="text" id="m-planner" value="${esc(r.planner)}" placeholder="選填"></div>
+      </div>
+      <label class="check"><input type="checkbox" id="m-public" ${k.hidePublic ? '' : 'checked'}><span>在進度看板公開（只顯示名稱、類別、業務單位、日期與狀態）</span></label>
+      ${kpiMoreHTML(r, k)}`)}
     <div class="dw-actions"><button type="submit" class="btn primary">儲存</button><span class="grow"></span>${x ? `<button type="button" class="btn danger ${S.armedDelete ? 'armed' : ''}" data-act="delete">${S.armedDelete ? '確定刪除？再按一次' : '刪除這筆紀錄'}</button>` : ''}</div>
-  </form>`;
+  </form>
+  <!--LOADCARD-->`;
 }
 async function saveManual(ev){
   ev.preventDefault();
@@ -1956,7 +1948,16 @@ function wAuto(x){
   else if (x.status === 'Postponed') status = 'postponed';
   else if (x.status === 'Open' && !t.stage) status = 'not started';
   else { const d = parseD(r.dueDate); status = d && d < today0() ? 'delay' : 'on time'; }
-  return {type:defaultWType(r.category), title:r.title || '', content, progress:t.stage || (x.status === 'Done' ? '已交件' : '-'), blocker:'無', status, due:fmtSlash(t.eta || r.dueDate || t.deliveredDate) || 'TBC', next:'-'};
+  const L = S.load.has(x.id) ? normLoad(S.load.get(x.id)) : null;
+  const pct = L && L.progress != null && L.progress !== '' && isActive(x.status) ? `（${L.progress}%）` : '';
+  const progress = x.status === 'Done' ? (t.stage || '已交件') : (t.stage || (pct ? '製作中' : '-')) + pct;
+  let next = '-';
+  if (isActive(x.status) && x.status !== 'Postponed'){
+    const fri = parseD(S.weekFri) || nextFriday(); const d = parseD(t.eta || r.dueDate);
+    if (d && d <= fri) next = '完稿交件';
+    else if (d && d <= addDays(fri, 7)) next = `${d.getMonth() + 1}/${d.getDate()} 完稿`;
+  }
+  return {type:defaultWType(r.category), title:r.title || '', content, progress, blocker:'無', status, due:fmtSlash(t.eta || r.dueDate || t.deliveredDate) || 'TBC', next};
 }
 function weeklyRows(){
   const fri = parseD(S.weekFri) || nextFriday(); const from = addDays(fri, -6);
@@ -1972,9 +1973,10 @@ function renderWeekly(){
   if (!S.weekFri) S.weekFri = fmtD(nextFriday());
   if (!sec.dataset.built){
     sec.innerHTML = `
-      <div class="page-head"><div><h2>週報</h2><p class="sub">依週五開會日，列出進行中與本週完成的工作，欄位對應周報 Excel 的個人頁籤。欄位可直接修改，會自動儲存；按「複製到 Excel」後，到周報個人頁籤點選 <b>A2</b>（「工作類型」下面那一格）再貼上；或按「下載 Excel」取得同欄位的檔案。</p></div>
+      <div class="page-head"><div><h2>週五結算</h2><p class="sub">每週一次，在這一頁做完三件事：回報完成度（同步到量能）、確認本週量能、交出週報。表格欄位對應周報 Excel 的個人頁籤，修改會自動儲存。</p></div>
         <div class="dw-actions"><button class="btn sm" data-act="wk-prev">‹ 上一週</button><input type="date" id="wk-fri" style="width:auto"><button class="btn sm" data-act="wk-next">下一週 ›</button></div></div>
-      <div class="toolbar"><button class="btn primary" data-act="wk-copy">複製到 Excel</button><button class="btn" data-act="wk-xlsx">下載 Excel</button><span class="grow"></span><span class="hint js-wk-count"></span></div>
+      <div class="card wk-steps js-wk-steps"></div>
+      <div class="toolbar"><span class="hint">完成度按一下就儲存；「本週進度」「下週預計」會依階段、完成度與完稿日自動帶入，需要時再改寫。</span><span class="grow"></span><span class="hint js-wk-count"></span></div>
       <div class="tablewrap"><table class="wk"><thead><tr><th>工作類型</th><th>項目名稱</th><th>內容簡述</th><th>本週進度</th><th>卡點／需協助事項</th><th>目前狀態</th><th>預計完成日</th><th>下週預計完成事項</th><th></th></tr></thead><tbody class="js-wk"></tbody></table></div>
       <p class="hint">「本週進度」預設帶入製作階段；「目前狀態」依進度自動判斷（待處理＝not started、超過完稿日＝delay）。按 × 可把該項從週報移除（不影響工作台），清空欄位會恢復自動值。</p>`;
     sec.dataset.built = '1';
@@ -1983,12 +1985,19 @@ function renderWeekly(){
   const act = document.activeElement; const keep = act && act.closest && act.closest('#v-weekly .js-wk') ? [act.dataset.id, act.dataset.f, act.selectionStart] : null;
   const rows = weeklyRows();
   $('.js-wk-count', sec).textContent = `共 ${rows.length} 項`;
+  const cur = S.weekFri === fmtD(nextFriday());
+  $('.js-wk-steps', sec).innerHTML = weeklySteps(rows, cur);
+  const progChips = x => {
+    if (!cur || !isActive(x.status)) return '';
+    const L = S.load.has(x.id) ? normLoad(S.load.get(x.id)) : {};
+    return `<div class="pchips wk-prog" role="group" aria-label="${esc(x.r.title)} 完成度">${PROGRESS_STEPS.map(p => `<button type="button" class="pchip ${L.progress === p ? 'on' : ''}" data-act="cap-prog" data-id="${esc(x.id)}" data-p="${p}">${p}%</button>`).join('')}</div>`;
+  };
   const ta = (id, f, v, auto) => `<textarea data-wk="1" data-id="${esc(id)}" data-f="${f}" rows="${Math.min(5, Math.max(2, String(v).split('\n').length))}" placeholder="${esc(auto)}">${esc(v)}</textarea>`;
   $('.js-wk', sec).innerHTML = rows.length ? rows.map(({x, v, a}) => `<tr>
     <td><select data-wk="1" data-id="${esc(x.id)}" data-f="type">${WTYPES.map(t => `<option ${t === v.type ? 'selected' : ''}>${t}</option>`).join('')}</select></td>
     <td>${ta(x.id, 'title', v.title, a.title)}<div class="mono muted" style="font-size:11px">${esc(x.r.no || x.id)}</div></td>
     <td>${ta(x.id, 'content', v.content, a.content)}</td>
-    <td>${ta(x.id, 'progress', v.progress, a.progress)}</td>
+    <td>${ta(x.id, 'progress', v.progress, a.progress)}${progChips(x)}</td>
     <td>${ta(x.id, 'blocker', v.blocker, a.blocker)}</td>
     <td><select data-wk="1" data-id="${esc(x.id)}" data-f="status">${WSTATUS.map(t => `<option ${t === v.status ? 'selected' : ''}>${t}</option>`).join('')}</select></td>
     <td><input type="text" data-wk="1" data-id="${esc(x.id)}" data-f="due" value="${esc(v.due)}" placeholder="${esc(a.due)}" style="width:110px"></td>
@@ -1996,6 +2005,26 @@ function renderWeekly(){
     <td><button class="it-del" data-act="wk-hide" data-id="${esc(x.id)}" aria-label="從週報移除">×</button></td></tr>`).join('')
     : `<tr><td colspan="9"><div class="empty"><b>這一週沒有可列入週報的工作</b><span>進行中的工作，或在這週完成的工作會出現在這裡。</span></div></td></tr>`;
   if (keep){ const el = $(`#v-weekly [data-id="${CSS.escape(keep[0])}"][data-f="${keep[1]}"]`); if (el){ el.focus(); if (keep[2] != null && el.setSelectionRange) try { el.setSelectionRange(keep[2], keep[2]); } catch(_){} } }
+}
+function weeklySteps(rows, cur){
+  if (!cur) return `<div class="wk-step" style="grid-column:1/-1"><span class="stub-k">過去或未來的週次</span><p>回報完成度與確認量能只適用本週；這裡可以檢視或修改當週的週報內容。</p><div class="dw-actions"><button class="btn sm primary" data-act="wk-copy">複製到 Excel</button><button class="btn sm" data-act="wk-xlsx">下載 Excel</button></div></div>`;
+  const mon = fmtD(monOf(today0()));
+  const act = rows.filter(({x}) => isActive(x.status));
+  const done = act.filter(({x}) => { const L = S.load.get(x.id); return L && L.remainingAt && L.remainingAt >= mon; }).length;
+  const s1 = `<div class="wk-step ${act.length && done === act.length ? 'ok' : ''}"><span class="stub-k"><i>${act.length && done === act.length ? '✓' : '1'}</i>回報完成度</span>
+    <p>${act.length ? `進行中 ${act.length} 件，本週已回報 <b>${done}</b> 件。在下表「本週進度」欄點完成度即可。` : '目前沒有進行中的工作。'}</p></div>`;
+  let s2;
+  if (!S.loaded.load) s2 = `<div class="wk-step"><span class="stub-k"><i>2</i>確認本週量能</span><p>量能資料讀取中…</p></div>`;
+  else {
+    const C = capData(); const sugN = allJobs(C).filter(j => !j.confirmed).length;
+    const conf = S.loadconf.confirmedAt; const ok = !!conf && fmtD(monOf(new Date(conf))) === mon;
+    s2 = `<div class="wk-step ${ok ? 'ok' : ''}"><span class="stub-k"><i>${ok ? '✓' : '2'}</i>確認本週量能</span>
+      <p>${C.weeks.map(w => `${esc(w.label)} ${bandChip(w.band)}`).join('　')}${sugN ? `<br>其中 ${sugN} 件仍是系統預估 <button class="linkbtn" data-act="triage-open">逐件確認</button>` : ''}</p>
+      <div class="dw-actions"><button class="btn sm ${ok ? '' : 'primary'}" data-act="cap-confirm">${ok ? '重新確認' : '確認本週量能'}</button><span class="hint">${ok ? `已確認 ${esc(showDT(conf))}` : '主管會看到確認時間'}</span></div></div>`;
+  }
+  const s3 = `<div class="wk-step"><span class="stub-k"><i>3</i>交出週報</span><p>複製後到周報個人頁籤點 <b>A2</b>（「工作類型」下面那一格）貼上，或下載同欄位的 Excel。</p>
+    <div class="dw-actions"><button class="btn sm primary" data-act="wk-copy">複製到 Excel</button><button class="btn sm" data-act="wk-xlsx">下載 Excel</button></div></div>`;
+  return s1 + s2 + s3;
 }
 async function saveWeekly(id, patch){
   const x = findRow(id); if (!x) return;
@@ -2049,7 +2078,7 @@ const PROGRESS_STEPS = [0, 25, 50, 75, 90, 100];
 const QUICK_EST = [['半天', 4], ['1 天', 8], ['2 天', 16], ['3 天', 24], ['5 天', 40]];
 const AVAIL_LINE = 0.85;
 const bandOf = ratio => LOAD_BANDS.find(b => ratio < b.max) || LOAD_BANDS[LOAD_BANDS.length - 1];
-const bandStyle = b => `background:color-mix(in srgb, var(--load) ${b.pct}%, var(--surface));color:${b.pct >= 66 ? '#fff' : 'var(--ink)'}`;
+const bandStyle = b => `background:color-mix(in srgb, var(--st-crit) ${b.pct}%, var(--surface));color:${b.pct >= 66 ? '#fff' : 'var(--ink)'}`;
 const hrs = n => (Math.round(num(n) * 10) / 10).toString();
 const fmtDays = h => { h = num(h); if (!h) return '—'; return h >= 8 ? `${r1(h / 8)} 天` : `${hrs(h)} 小時`; };
 const fmtEst = h => { h = num(h); if (!h) return '—'; return `${fmtDays(h)}（${hrs(h)}h）`; };
@@ -2289,16 +2318,18 @@ function renderCapacity(){
   sec.innerHTML = `
     <div class="page-head"><div><h2>量能</h2><p class="sub">「本週剩餘」只算今天到週五。可用時數 = 工作天 × 8 小時，扣除國定假日、每週例行會議 ${hrs(num(S.loadconf.meetingHours, 4))} 小時與請假；「還能再排」以可用時數的 85% 為上限換算，保留一點緩衝。</p></div>
       ${owner ? '<span class="tag">主管只看得到區間與還能再排多少，看不到時數</span>' : ''}</div>
-    ${remind ? `<div class="notice info"><b>本週還沒確認量能</b><span>花一分鐘在下方「本週更新」回報進度，再按「確認本週量能」，主管會看到確認時間。</span></div>` : ''}
+    ${remind ? `<div class="notice info"><b>本週還沒確認量能</b><span>到「週五結算」回報完成度並確認本週量能，主管會看到確認時間。</span><button class="btn sm primary" data-view="weekly">前往週五結算</button></div>` : ''}
     <div class="capmeta"><span>${conf ? `設計最後確認：${esc(showDT(conf))}` : '設計尚未確認量能'}</span><span>${all.length} 件計入量能${sugN ? `，其中 ${sugN} 件為系統預估` : ''}</span>${owner && sugN ? '<button class="btn sm" data-act="triage-open">逐件確認時數</button>' : ''}</div>
     <div class="capgrid">${C.weeks.map(big).join('')}</div>
     <div class="card"><h3 style="font-size:15px;margin-bottom:10px">逐日負載 <span class="muted" style="font-size:12px;font-weight:500">點一天看當天排入的工作</span></h3><div class="strip2">${strip}</div>${dayDetail}<div class="legend">${legend}</div></div>
     ${att.length ? `<div class="card attn"><h3 style="font-size:15px">需要注意</h3><ul class="plain">${att.map(x => `<li><span>${esc(x.t)}</span>${x.triage ? ` <button class="linkbtn" data-act="triage-open">${esc(x.a)}</button>` : x.id ? ` <button class="linkbtn" data-act="cap-open" data-id="${esc(x.id)}">${esc(x.a)}</button>` : ` <span class="muted">${esc(x.a)}</span>`}</li>`).join('')}</ul></div>` : ''}
     ${owner ? `
-    <div style="display:grid;gap:10px"><h3 style="font-size:15px">本週更新 <span class="muted" style="font-size:12px;font-weight:500">完成度或剩餘工時擇一回報，系統從今天起重新分攤；兩週欄位可鎖定投入時數，清空恢復自動，總工時不變</span></h3>
+    <div class="dw-actions"><button class="btn primary" data-act="cap-confirm">確認本週量能</button><span class="hint">${conf ? `上次確認：${esc(showDT(conf))}` : '尚未確認過'}。完成度平常在「週五結算」回報即可。</span></div>
+    <details class="card conf" id="cap-fine" ${S.capFineOpen ? 'open' : ''}><summary>細部調整：剩餘工時、鎖定投入時數 <span class="muted" style="font-size:12px;font-weight:500">需要時才用</span></summary>
+      <p class="hint" style="margin:10px 0">完成度或剩餘工時擇一回報，系統從今天起重新分攤；兩週欄位可鎖定投入時數，清空恢復自動，總工時不變。</p>
       <div class="tablewrap"><table class="ck" style="min-width:920px"><thead><tr><th>工作</th><th>完稿日</th><th class="n">總工時</th><th>完成度</th><th class="n">剩餘（h）</th><th class="n">${esc(C.weeks[0].label)}（h）</th><th class="n">${esc(C.weeks[1].label)}（h）</th></tr></thead>
       <tbody>${ckRows || '<tr><td colspan="7"><div class="empty"><b>目前沒有進行中的工作</b></div></td></tr>'}</tbody></table></div>
-      <div class="dw-actions"><button class="btn primary" data-act="cap-confirm">確認本週量能</button><span class="hint">${conf ? `上次確認：${esc(showDT(conf))}` : '尚未確認過'}。確認後，主管畫面會顯示確認時間。</span></div></div>`
+    </details>`
     : `
     <div style="display:grid;gap:10px"><h3 style="font-size:15px">這兩週的工作 <span class="muted" style="font-size:12px;font-weight:500">條狀為佔該週可用時間的比例</span></h3>
       <div class="tablewrap"><table style="min-width:640px"><thead><tr><th>工作</th><th>完稿日</th><th>狀態</th><th>${esc(C.weeks[0].label)}</th><th>${esc(C.weeks[1].label)}</th></tr></thead><tbody>${mgrRows || '<tr><td colspan="5"><div class="empty"><b>這兩週沒有排入的工作</b></div></td></tr>'}</tbody></table></div></div>`}
@@ -2348,7 +2379,9 @@ async function writeLoadConf(patch){
 }
 function loadStatusSync(id, st){
   if (!S.load.has(id)) return;
-  const W = normLoad(S.load.get(id)).window;
+  const L0 = normLoad(S.load.get(id)); const W = L0.window;
+  if (st === 'Done'){ writeLoad(id, L0.progress === 100 ? {} : {progress:100, remaining:0, remainingAt:fmtD(today0()), remainingTs:new Date().toISOString()}); return; }
+  if (L0.progress === 100 && isActive(st)){ writeLoad(id, {progress:null, remaining:null, remainingAt:'', remainingTs:'', ...(st === 'On going' && !W.start ? {window:{...W, start:fmtD(today0())}} : {})}); return; }
   writeLoad(id, st === 'On going' && !W.start ? {window:{...W, start:fmtD(today0())}} : {});
 }
 function jobTotalNow(id){ const C = capData(); const j = allJobs(C).find(o => o.id === id); return j ? j.total : effTotal(S.load.get(id)); }
@@ -2379,7 +2412,7 @@ function loadCardHTML(x){
       <div><span>${esc(w1.label)}</span><b>${hrs(weekHours(j, w1))}h</b></div></div>`;
   const sugBox = !conf ? `<div class="notice info"><b>系統預估 ${esc(fmtEst(sug.hours))}</b><span>${esc(sug.basis)}</span><button class="btn sm primary" data-act="load-accept" data-h="${sug.hours}">採用</button></div>` : '';
   const doneBox = L.progress === 100 ? `<div class="notice warn"><b>完成度已回報 100%</b><span>要把這件改為「完成」嗎？</span><button class="btn sm" data-act="load-done">改為完成</button></div>` : '';
-  let editor = '<div class="dw-actions"><button type="button" class="btn sm" data-act="load-edit">更新時程</button></div>';
+  let editor = '<div class="dw-actions"><button type="button" class="btn sm" data-act="load-edit">更新時程／調整工時</button></div>';
   if (S.loadEdit){
     const base = conf ? num(L.estHours) : sug.hours;
     const useDays = base >= 8 && Math.abs(base / 4 - Math.round(base / 4)) < 0.01;
@@ -2409,7 +2442,7 @@ function loadCardHTML(x){
   const adjBox = `<div class="field"><span class="lbl">工時調整</span>${adjList}
       <div class="dw-actions"><input type="number" id="lf-adj" step="0.5" placeholder="+4 或 -2" style="width:110px" aria-label="調整時數"> 小時 <select id="lf-adj-reason" style="width:auto" aria-label="調整原因">${ADJ_REASONS.map(r => `<option>${r}</option>`).join('')}</select><button type="button" class="btn sm" data-act="lf-adj-add">加入</button>${L.adjustments.length ? '<button type="button" class="linkbtn" data-act="lf-adj-undo">撤銷最後一筆</button>' : ''}</div>
       <span class="hint">按「加入」就會儲存；主管只看得到原因與增減，看不到時數。</span></div>`;
-  return `<div class="private dw-sec">${head}${sumBox}${sugBox}${doneBox}${editor}${adjBox}</div>`;
+  return `<div class="private dw-sec">${head}${sumBox}${sugBox}${doneBox}${S.loadEdit ? editor + adjBox : (adjList ? `<div class="field"><span class="lbl">工時調整</span>${adjList}</div>` : '') + editor}</div>`;
 }
 function refreshLoadCard(){ const el = $('#load-card'); const x = S.drawerId && findRow(S.drawerId); if (el && x) el.innerHTML = loadCardHTML(x); }
 async function saveLoadForm(ev){
@@ -2914,10 +2947,11 @@ document.addEventListener('click', ev => {
     writeLoad(S.drawerId, {adjustments:[...L.adjustments, {delta:r1(dlt), reason:$('#lf-adj-reason').value, at:new Date().toISOString()}]}).then(ok => { if (ok){ toast('已加入調整'); refreshLoadCard(); } });
   }
   else if (act === 'lf-adj-undo'){ const L = normLoad(S.load.get(S.drawerId)); writeLoad(S.drawerId, {adjustments:L.adjustments.slice(0, -1)}).then(ok => { if (ok){ toast('已撤銷最後一筆調整'); refreshLoadCard(); } }); }
-  else if (act === 'cap-prog') setProgress(a.dataset.id, num(a.dataset.p));
+  else if (act === 'cap-prog') setProgress(a.dataset.id, num(a.dataset.p)).then(() => renderCurrent());
   else if (act === 'cap-open') openDrawer(a.dataset.id);
   else if (act === 'cap-day'){ S.capDay = S.capDay === a.dataset.ds ? null : a.dataset.ds; renderCapacity(); }
-  else if (act === 'cap-confirm') writeLoadConf({confirmedAt:new Date().toISOString()}).then(ok => { if (ok){ toast('已確認本週量能，主管會看到確認時間'); renderCapacity(); } });
+  else if (act === 'cap-confirm') writeLoadConf({confirmedAt:new Date().toISOString()}).then(ok => { if (ok){ toast('已確認本週量能，主管會看到確認時間'); renderCurrent(); } });
+  else if (act === 'mark-done'){ const sel = $('#o-status') || $('#m-status'); if (sel){ sel.value = 'Done'; drawerSync('status'); sel.form.requestSubmit(); } }
   else if (act === 'sg-save'){ const tbl = {}; $$('[data-sg]').forEach(i => { if (i.value !== '') tbl[i.dataset.sg] = Math.max(0, num(i.value)); }); writeLoadConf({suggest:tbl}).then(ok => ok && toast('已儲存建議工時，未確認的案件會重新預抓')); }
   else if (act === 'sg-reset') writeLoadConf({suggest:{}}).then(ok => ok && toast('已恢復預設建議工時'));
   else if (act === 'lv-add'){
@@ -2975,6 +3009,9 @@ document.addEventListener('change', ev => {
   const t = ev.target;
   if (t.dataset && t.dataset.capRem){ if (t.value !== '') setRemaining(t.dataset.capRem, num(t.value)).then(() => { t.blur(); renderCapacity(); }); return; }
   if (t.dataset && t.dataset.capLock){ const id = t.dataset.capLock; const L = normLoad(S.load.get(id)); const alloc = {...L.alloc}; if (t.value === '') delete alloc[t.dataset.week]; else alloc[t.dataset.week] = Math.max(0, num(t.value)); writeLoad(id, {alloc}).then(ok => { if (ok){ toast('已更新投入時數'); t.blur(); renderCapacity(); } }); return; }
+  if (t.id === 'o-status' || t.id === 'm-status'){ drawerSync('status'); }
+  else if (t.id === 'o-delivered' || t.id === 'm-delivered'){ drawerSync('delivered'); }
+  else if (t.id === 'o-stage' || t.id === 'm-stage' || t.id === 'm-due'){ drawerSync(); }
   if (t.id === 'tri-h'){ if (S.triage){ S.triage.sel = Math.max(0, num(t.value)); renderDrawer(); } return; }
   if (t.id === 'tri-start' || t.id === 'tri-end'){ if (S.triage){ S.triage[t.id === 'tri-start' ? 'start' : 'end'] = t.value; renderDrawer(); } return; }
   if (t.id === 'd-needest'){ S.desk.needEst = t.checked; renderDesk(); return; }
@@ -3036,7 +3073,7 @@ document.addEventListener('keydown', ev => {
   if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.matches('.row[data-act="open"]')){ ev.preventDefault(); openDrawer(ev.target.dataset.id); }
 });
 $('#scrim').addEventListener('click', closeDrawer);
-document.addEventListener('toggle', ev => { if (ev.target && ev.target.id === 'cap-conf') S.capConfOpen = ev.target.open; }, true);
+document.addEventListener('toggle', ev => { const id = ev.target && ev.target.id; if (id === 'cap-conf') S.capConfOpen = ev.target.open; else if (id === 'cap-fine') S.capFineOpen = ev.target.open; else if (id === 'own-more' || id === 'man-more') S.moreOpen = ev.target.open; }, true);
 // chart tooltip
 const tip = $('#tip');
 document.addEventListener('pointermove', ev => {
