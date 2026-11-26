@@ -299,6 +299,56 @@ table.ck td:nth-child(4){min-width:300px}
 .preview{display:grid;gap:8px;font-size:14px}
 .preview .pv{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .bchip{display:inline-block;border-radius:6px;padding:1px 9px;font-size:12px;font-weight:700;border:1px solid var(--line)}
+.badge{display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:var(--st-crit);color:#fff;font-size:11px;font-weight:700;line-height:1;font-family:var(--f-mono)}
+/* motion: restrained, purposeful; all disabled by prefers-reduced-motion */
+:root{--ease-out:cubic-bezier(.2,.7,.2,1);--ease-spring:cubic-bezier(.2,1.4,.4,1)}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideIn{from{opacity:.4;transform:translateX(32px)}to{opacity:1;transform:none}}
+@keyframes toastIn{from{opacity:0;transform:translate(-50%,10px)}to{opacity:1;transform:translate(-50%,0)}}
+@keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes colUp{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+@keyframes fillUp{from{height:0}}
+@keyframes drift{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@keyframes breathe{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--st-crit) 0%,transparent)}50%{box-shadow:0 0 0 5px color-mix(in srgb,var(--st-crit) 24%,transparent)}}
+@keyframes pop{0%{transform:scale(.3)}100%{transform:scale(1)}}
+.btn,.tab,.pchip,.chip,.cat,.seg button,.row,.dcell,tbody tr,.linkbtn,.preset{transition:background-color .18s ease,border-color .18s ease,color .18s ease,box-shadow .22s ease,transform .14s ease}
+.btn:active,.pchip:active,.preset:active{transform:translateY(1px)}
+button.dcell:hover{transform:translateY(-2px);box-shadow:0 8px 18px -10px color-mix(in srgb,#000 45%,transparent)}
+th{background:transparent;border-bottom:1px solid var(--line-2);font-weight:600;letter-spacing:.04em}
+.lhead{background:transparent;border-bottom-color:var(--line-2)}
+tbody tr:hover{background:color-mix(in srgb,var(--surface-2) 70%,transparent)}
+/* entry choreography: plays once when a view opens */
+.view.anim-in>*{animation:rise .55s var(--ease-out) both}
+.view.anim-in>:nth-child(2){animation-delay:.05s}.view.anim-in>:nth-child(3){animation-delay:.1s}.view.anim-in>:nth-child(4){animation-delay:.15s}
+.view.anim-in>:nth-child(5){animation-delay:.2s}.view.anim-in>:nth-child(6){animation-delay:.25s}.view.anim-in>:nth-child(n+7){animation-delay:.3s}
+.anim-in .list .row,.anim-in tbody tr{animation:rise .45s var(--ease-out) both}
+.anim-in .list .row:nth-child(2),.anim-in tbody tr:nth-child(1){animation-delay:.12s}
+.anim-in .list .row:nth-child(3),.anim-in tbody tr:nth-child(2){animation-delay:.15s}
+.anim-in .list .row:nth-child(4),.anim-in tbody tr:nth-child(3){animation-delay:.18s}
+.anim-in .list .row:nth-child(5),.anim-in tbody tr:nth-child(4){animation-delay:.21s}
+.anim-in .list .row:nth-child(6),.anim-in tbody tr:nth-child(5){animation-delay:.24s}
+.anim-in .list .row:nth-child(n+7),.anim-in tbody tr:nth-child(n+6){animation-delay:.27s}
+.anim-in .strip-d>*{animation:rise .45s var(--ease-out) both}
+.anim-in .strip-w:first-child .strip-d>:nth-child(1){animation-delay:.18s}.anim-in .strip-w:first-child .strip-d>:nth-child(2){animation-delay:.22s}
+.anim-in .strip-w:first-child .strip-d>:nth-child(3){animation-delay:.26s}.anim-in .strip-w:first-child .strip-d>:nth-child(4){animation-delay:.3s}
+.anim-in .strip-w:first-child .strip-d>:nth-child(5){animation-delay:.34s}.anim-in .strip-w:nth-child(2) .strip-d>:nth-child(1){animation-delay:.38s}
+.anim-in .strip-w:nth-child(2) .strip-d>:nth-child(2){animation-delay:.42s}.anim-in .strip-w:nth-child(2) .strip-d>:nth-child(3){animation-delay:.46s}
+.anim-in .strip-w:nth-child(2) .strip-d>:nth-child(4){animation-delay:.5s}.anim-in .strip-w:nth-child(2) .strip-d>:nth-child(5){animation-delay:.54s}
+.anim-in .sharebar i,.anim-in .meter i,.anim-in .hb-bar{animation:grow .9s var(--ease-out) both .3s;transform-origin:left center}
+.anim-in .chart .col{animation:colUp .8s var(--ease-out) both .25s;transform-origin:bottom;transform-box:fill-box}
+/* capacity "water level": the share of the week already planned, with a slow drifting crest */
+.capcell{position:relative;overflow:hidden;isolation:isolate}
+.capcell>:not(.level){position:relative;z-index:1}
+.capcell .level{position:absolute;left:0;right:0;bottom:0;height:var(--lv,0%);background:color-mix(in srgb,var(--ink) 9%,transparent);z-index:0;pointer-events:none}
+.capcell .level svg{position:absolute;left:0;bottom:calc(100% - 1px);width:200%;height:10px;display:block;animation:drift 11s linear infinite}
+.capcell .level path{fill:color-mix(in srgb,var(--ink) 9%,transparent)}
+.capcell.over{animation:breathe 3.4s ease-in-out infinite}
+.anim-in .capcell .level{animation:fillUp 1.3s var(--ease-out) both .2s}
+.scrim:not([hidden]){animation:fadeIn .25s ease}
+.drawer:not([hidden]){animation:slideIn .34s cubic-bezier(.2,.8,.2,1)}
+.toast:not([hidden]){animation:toastIn .3s cubic-bezier(.2,.8,.2,1)}
+.badge.pop{animation:pop .5s var(--ease-spring)}
 /* drawer */
 .scrim{position:fixed;inset:0;background:color-mix(in srgb,#000 45%,transparent);z-index:40}
 .drawer{position:fixed;top:0;right:0;bottom:0;width:min(580px,100%);background:var(--surface);z-index:41;overflow-y:auto;box-shadow:var(--shadow);display:grid;align-content:start}
@@ -816,8 +866,13 @@ function renderNav(){
   const tabs = [['new','填寫需求'],['board','進度看板']];
   if (S.isOwner) tabs.push(['desk','工作台'],['weekly','週報'],['capacity','量能'],['kpi','KPI 結算'],['setup','設定']);
   else if (S.isManager) tabs.push(['capacity','量能']);
+  // 待評估時數的紅點：只在設計本人、量能資料讀完後計算，避免載入中誤報
+  const pend = S.isOwner && !S.demo && S.loaded.load && S.loaded.requests && S.loaded.kpi ? triageQueue().length : 0;
+  try { document.title = pend ? `(${pend}) 商發部設計需求單` : '商發部設計需求單'; } catch(e){}
+  const _bn = pend;
   $('#tabs').innerHTML = tabs.map(([v, l]) =>
-    `<button class="tab" data-view="${v}" ${S.view === v ? 'aria-current="page"' : ''}>${esc(l)}${OWNER_VIEWS.includes(v) ? '<span class="lk">僅你</span>' : v === 'capacity' && S.isOwner ? '<span class="lk">主管</span>' : ''}</button>`).join('');
+    `<button class="tab" data-view="${v}" ${S.view === v ? 'aria-current="page"' : ''}>${esc(l)}${v === 'desk' && pend ? `<span class="badge${pend !== S._badgeN ? ' pop' : ''}" title="${pend} 件還沒確認時數" aria-label="${pend} 件待評估">${pend > 99 ? '99+' : pend}</span>` : ''}${OWNER_VIEWS.includes(v) ? '<span class="lk">僅你</span>' : v === 'capacity' && S.isOwner ? '<span class="lk">主管</span>' : ''}</button>`).join('');
+  S._badgeN = _bn;
   const who = $('#who');
   if (S.conn === 'none') who.innerHTML = '未連線';
   else if (!S.identityKnown) who.textContent = '連線中…';
@@ -840,11 +895,20 @@ function setView(v, fromHash){
   if (!VIEWS.includes(v)) v = S.identityKnown && S.isOwner ? 'desk' : S.identityKnown && S.isManager ? 'capacity' : 'new';
   if (OWNER_VIEWS.includes(v) && S.identityKnown && !S.isOwner) v = 'board';
   if (v === 'capacity' && S.identityKnown && !S.isOwner && !S.isManager) v = 'board';
+  if (S.view !== v) S.entryPending = v;
   S.view = v;
   if (!fromHash && location.hash !== '#' + v) { try { history.replaceState(null, '', '#' + v); } catch(e){ location.hash = v; } }
   for (const x of VIEWS) $('#v-' + x).hidden = x !== v;
   renderNav(); renderNotices(); renderCurrent();
+  if (S.entryPending === v && viewReady(v)) playEntry();
   window.scrollTo(0, 0);
+}
+function viewReady(v){ if (S.conn === 'none' || S.demo) return true; if (!S.loaded.requests) return false; return v !== 'capacity' || !!S.loaded.load || (!S.isOwner && !S.isManager); }
+function playEntry(){
+  const sec = $('#v-' + S.view); S.entryPending = null; if (!sec) return;
+  if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  sec.classList.remove('anim-in'); void sec.offsetWidth; sec.classList.add('anim-in');
+  clearTimeout(playEntry._t); playEntry._t = setTimeout(() => sec.classList.remove('anim-in'), 1700);
 }
 function renderCurrent(){
   const v = S.view;
@@ -860,9 +924,12 @@ function renderCurrent(){
   else if (v === 'weekly') renderWeekly();
   else if (v === 'capacity'){ if (S.isOwner || S.isManager) renderCapacity(); else $('#v-capacity').innerHTML = `<div class="card empty"><b>確認身分中…</b><span>這一頁只有設計窗口與主管看得到。</span></div>`; }
 }
-function onData(){
+function onData(){ clearTimeout(onData._t); onData._t = setTimeout(onDataNow, 40); }
+function onDataNow(){
+  const se = $('#v-' + S.view); if (se && se.classList.contains('anim-in')) se.classList.remove('anim-in');
   renderNav(); renderNotices();
   if (S.view === 'new'){ patchForm(); renderPresets(); } else renderCurrent();
+  if (S.entryPending === S.view && viewReady(S.view)) playEntry();
   refreshItemNames();
   if (S.drawerId && !S.drawerDirty && !S.loadEdit) renderDrawer();
   if (S.isOwner) scheduleSuggestSync();
@@ -1911,7 +1978,7 @@ const adjSum = L => ((L && L.adjustments) || []).reduce((a, x) => a + num(x.delt
 const isConfirmed = L => num(L && L.estHours) > 0;
 function effTotal(L){ L = normLoad(L); return Math.max(0, (isConfirmed(L) ? num(L.estHours) : num(L.suggestHours)) + adjSum(L)); }
 const estTotal = effTotal;
-function availLabel(h){ if (h < 0.5) return '無法再承接'; if (h < 4) return '約半天以內'; if (h < 8) return '約半天～1 天'; if (h < 16) return '約 1～2 天'; if (h < 24) return '約 2～3 天'; return '3 天以上'; }
+function availLabel(h){ if (h < 0.5) return '已滿，不建議再排入工作'; if (h < 4) return '還能再排約半天以內'; if (h < 8) return '還能再排約半天～1 天'; if (h < 16) return '還能再排約 1～2 天'; if (h < 24) return '還能再排約 2～3 天'; return '還能再排 3 天以上'; }
 
 /* 時數預抓：同類別 ≥3 件已確認評估的中位數 → 量能設定的建議工時表 → 預設表 */
 function learnedUnits(rm){
@@ -2086,7 +2153,7 @@ function renderCapacity(){
   const C = capData(); const t = today0();
   const all = allJobs(C); const sugN = all.filter(j => !j.confirmed).length;
   const conf = S.loadconf.confirmedAt; const confThisWeek = !!conf && fmtD(monOf(new Date(conf))) === fmtD(monOf(t));
-  const big = w => `<div class="capcell" style="${bandStyle(w.band)}"><span class="cap-k">${w.label}${w.label === '本週剩餘' ? `・${w.openDays} 個工作天` : ''}</span><b>${w.band.zh}</b><span class="cap-d">${esc(showD(w.mon))} – ${esc(showD(addDays(w.mon, 4)))}</span>${owner ? `<span class="cap-h">已排 ${hrs(w.load)}h ／ 可用 ${hrs(w.cap)}h</span>` : ''}<span class="cap-av">可承接：${availLabel(w.avail)}</span></div>`;
+  const big = w => `<div class="capcell ${w.ratio > 1.0001 ? 'over' : ''}" style="${bandStyle(w.band)};--lv:${(Math.min(1, w.ratio) * 100).toFixed(1)}%"><span class="level" aria-hidden="true"><svg viewBox="0 0 200 12" preserveAspectRatio="none"><path d="M0 6 Q12.5 0 25 6 T50 6 T75 6 T100 6 T125 6 T150 6 T175 6 T200 6 V12 H0 Z"/></svg></span><span class="cap-k">${w.label}${w.label === '本週剩餘' ? `・${w.openDays} 個工作天` : ''}</span><b>${w.band.zh}</b><span class="cap-d">${esc(showD(w.mon))} – ${esc(showD(addDays(w.mon, 4)))}</span>${owner ? `<span class="cap-h">已排 ${hrs(w.load)}h ／ 可用 ${hrs(w.cap)}h</span>` : ''}<span class="cap-av">${availLabel(w.avail)}</span></div>`;
   const dayCell = x => {
     const lab = `${WK[x.d.getDay()]} ${x.d.getMonth() + 1}/${x.d.getDate()}`;
     if (x.past) return `<div class="dcell off past"><span>${lab}</span><b>已過</b></div>`;
@@ -2127,8 +2194,8 @@ function renderCapacity(){
   const tb = S.loadconf.suggest || {};
   const remind = owner && !confThisWeek && (t.getDay() >= 4 || t.getDay() === 0 || !conf);
   sec.innerHTML = `
-    <div class="page-head"><div><h2>量能</h2><p class="sub">「本週剩餘」只算今天到週五。可用時數 = 工作天 × 8 小時，扣除國定假日、每週例行會議 ${hrs(num(S.loadconf.meetingHours, 4))} 小時與請假；可承接以可用時數的 85% 為上限換算。</p></div>
-      ${owner ? '<span class="tag">主管只看得到區間與可承接範圍，看不到時數</span>' : ''}</div>
+    <div class="page-head"><div><h2>量能</h2><p class="sub">「本週剩餘」只算今天到週五。可用時數 = 工作天 × 8 小時，扣除國定假日、每週例行會議 ${hrs(num(S.loadconf.meetingHours, 4))} 小時與請假；「還能再排」以可用時數的 85% 為上限換算，保留一點緩衝。</p></div>
+      ${owner ? '<span class="tag">主管只看得到區間與還能再排多少，看不到時數</span>' : ''}</div>
     ${remind ? `<div class="notice info"><b>本週還沒確認量能</b><span>花一分鐘在下方「本週更新」回報進度，再按「確認本週量能」，主管會看到確認時間。</span></div>` : ''}
     <div class="capmeta"><span>${conf ? `設計最後確認：${esc(showDT(conf))}` : '設計尚未確認量能'}</span><span>${all.length} 件計入量能${sugN ? `，其中 ${sugN} 件為系統預估` : ''}</span>${owner && sugN ? '<button class="btn sm" data-act="triage-open">逐件確認時數</button>' : ''}</div>
     <div class="capgrid">${C.weeks.map(big).join('')}</div>
@@ -2292,7 +2359,7 @@ function triageHTML(){
   const lines = Array.isArray(r.items) && r.items.length ? r.items.map(it => [it.name, it.size, it.qty ? '×' + it.qty : ''].filter(Boolean).join(' ')) : String(r.specs || '').split(/\n+/).filter(Boolean);
   const spec = lines.slice(0, 4).map(esc).join('<br>') + (lines.length > 4 ? `<br><span class="muted">…等 ${lines.length} 項</span>` : '');
   const before = capData(), after = capData({id, patch:{estHours:T.sel, window:{start:T.start, end:T.end}}});
-  const pv = after.weeks.map((w, i) => `<div class="pv"><span style="min-width:72px">${esc(w.label)}</span>${bandChip(before.weeks[i].band)}<span aria-hidden="true">→</span>${bandChip(w.band)}<span class="muted">可承接 ${availLabel(w.avail)}</span></div>`).join('');
+  const pv = after.weeks.map((w, i) => `<div class="pv"><span style="min-width:72px">${esc(w.label)}</span>${bandChip(before.weeks[i].band)}<span aria-hidden="true">→</span>${bandChip(w.band)}<span class="muted">${availLabel(w.avail)}</span></div>`).join('');
   const defStart = parseD(r.briefDate) || (r.createdAt ? day0(new Date(r.createdAt)) : today0());
   return `<div class="dw-head"><div style="display:grid;gap:4px;min-width:0"><span class="mono muted" style="font-size:12px">評估時程 · ${T.i + 1} / ${T.ids.length}</span><h3 id="dw-title">${esc(r.title)}</h3><div class="muted" style="font-size:13px">${esc(r.no || x.id)} · ${esc(CAT[r.category]?.zh || '')} · 數量 ${num(r.qty, 1)} ${esc(unit)}${r.planner ? ` · ${esc(r.planner)}` : ''}</div></div><button class="btn sm x" data-act="close">關閉</button></div>
   <div class="dw-body">
