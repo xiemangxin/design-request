@@ -8,7 +8,7 @@
 <title>商發部設計需求單</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=JetBrains+Mono:wght@400;600&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=Jost:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&family=Noto+Sans+TC:wght@400;500;700&display=swap">
 <style>
 /* Layout: a production job-ticket — form on the left, a perforated "ticket stub" on the right
    that live-computes the case level (D+n working days) and the weekly intake cutoff. */
@@ -442,6 +442,89 @@ details.conf[open]>summary::before{transform:rotate(90deg)}
   .score .hero{font-size:56px}
   .hb{grid-template-columns:84px minmax(0,1fr)}
 }
+/* ===== Soft theme: warm paper, soft depth, pill controls, terracotta accent ===== */
+:root{
+  --bg:#efe9e3; --surface:#f8f4f0; --surface-2:#ece5de; --ink:#2b2622; --ink-2:#6b615a; --ink-3:#978c84;
+  --line:#e4dcd4; --line-2:#d5cbc2;
+  --accent:#a8523c; --accent-hover:#8f4430; --accent-ink:#ffffff; --accent-soft:#f1e1d9;
+  --series:#c0614a; --grid:#e5dcd3; --load:#c0614a;
+  --crit-ink:#a8382f; --warn-ink:#8a5a00; --good-ink:#2f7a3a;
+  --soft:0 1px 0 rgba(255,255,255,.75) inset,0 14px 34px -18px rgba(110,72,52,.32),0 2px 8px -4px rgba(110,72,52,.14);
+  --soft-sm:0 1px 0 rgba(255,255,255,.7) inset,0 6px 16px -10px rgba(110,72,52,.35);
+  --sunk:inset 0 2px 5px rgba(110,72,52,.10),inset 0 -1px 0 rgba(255,255,255,.6);
+  --shadow:0 24px 60px -18px rgba(80,50,35,.35);
+  --f-display:"Jost","Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#1b1816; --surface:#25201d; --surface-2:#2d2723; --ink:#f1ebe5; --ink-2:#c7bcb2; --ink-3:#978b81;
+  --line:#3a322d; --line-2:#4a413a;
+  --accent:#e08a71; --accent-hover:#eaa08a; --accent-ink:#1b1816; --accent-soft:#3b2922;
+  --series:#d9826b; --grid:#352e29; --load:#d9826b;
+  --crit-ink:#f19588; --warn-ink:#f2c46a; --good-ink:#7fd08b;
+  --soft:0 1px 0 rgba(255,255,255,.04) inset,0 14px 34px -18px rgba(0,0,0,.7),0 2px 8px -4px rgba(0,0,0,.5);
+  --soft-sm:0 1px 0 rgba(255,255,255,.04) inset,0 6px 16px -10px rgba(0,0,0,.7);
+  --sunk:inset 0 2px 5px rgba(0,0,0,.35),inset 0 -1px 0 rgba(255,255,255,.03);
+  --shadow:0 24px 60px -18px rgba(0,0,0,.75); color-scheme:dark; } }
+:root[data-theme="dark"]{
+  --bg:#1b1816; --surface:#25201d; --surface-2:#2d2723; --ink:#f1ebe5; --ink-2:#c7bcb2; --ink-3:#978b81;
+  --line:#3a322d; --line-2:#4a413a;
+  --accent:#e08a71; --accent-hover:#eaa08a; --accent-ink:#1b1816; --accent-soft:#3b2922;
+  --series:#d9826b; --grid:#352e29; --load:#d9826b;
+  --crit-ink:#f19588; --warn-ink:#f2c46a; --good-ink:#7fd08b;
+  --soft:0 1px 0 rgba(255,255,255,.04) inset,0 14px 34px -18px rgba(0,0,0,.7),0 2px 8px -4px rgba(0,0,0,.5);
+  --soft-sm:0 1px 0 rgba(255,255,255,.04) inset,0 6px 16px -10px rgba(0,0,0,.7);
+  --sunk:inset 0 2px 5px rgba(0,0,0,.35),inset 0 -1px 0 rgba(255,255,255,.03);
+  --shadow:0 24px 60px -18px rgba(0,0,0,.75); color-scheme:dark; }
+body{letter-spacing:.01em}
+.top{background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:saturate(1.2) blur(14px);-webkit-backdrop-filter:saturate(1.2) blur(14px);border-bottom:1px solid color-mix(in srgb,var(--line) 70%,transparent)}
+body::before{background:var(--bg)}
+.brand h1{font-family:var(--f-display);font-weight:500;letter-spacing:.06em}
+.page-head h2{font-family:var(--f-display);font-weight:500;font-size:30px;letter-spacing:.08em}
+.tab{border-radius:999px;padding:7px 14px}
+.tab[aria-current="page"]{background:var(--surface);color:var(--accent);box-shadow:var(--soft-sm);font-weight:600}
+.who{border-radius:999px;background:var(--surface);border-color:transparent;box-shadow:var(--soft-sm)}
+.card,.list,.tablewrap,.sbox,.notice,.stub,.capcell,details.conf{border-radius:22px;border:1px solid color-mix(in srgb,var(--surface) 60%,var(--line));box-shadow:var(--soft);background:var(--surface)}
+.capcell{border-radius:24px}
+.private{border-radius:18px;border:none;background:var(--surface-2);box-shadow:var(--sunk)}
+.lsum div,.dcell{border-radius:14px}
+.lsum div{border:none;box-shadow:var(--soft-sm)}
+.notice.info{background:color-mix(in srgb,var(--accent) 7%,var(--surface))}
+.notice.warn{background:color-mix(in srgb,var(--st-warn) 12%,var(--surface))}
+.sbox span,.stub-k,.cap-k,.fs-title,th,.lhead,.dw-sec>h4{text-transform:uppercase;letter-spacing:.14em;font-size:11.5px;font-weight:600}
+.sbox b,.capcell b,.dn-big,.score .hero,.ind-v,.sugbox b{font-family:var(--f-display);font-weight:400;letter-spacing:.02em}
+.capcell b{font-size:46px}
+.btn{border-radius:999px;border:1px solid transparent;background:var(--surface);box-shadow:var(--soft-sm);padding:9px 18px;font-weight:500;letter-spacing:.04em}
+.btn:hover{background:var(--surface);box-shadow:0 1px 0 rgba(255,255,255,.75) inset,0 10px 22px -12px rgba(110,72,52,.45);color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);box-shadow:0 10px 22px -12px color-mix(in srgb,var(--accent) 80%,transparent),inset 0 1px 0 rgba(255,255,255,.25)}
+.btn.primary:hover{background:var(--accent-hover);color:var(--accent-ink)}
+.btn.sm{padding:6px 14px}
+.btn.danger{color:var(--crit-ink)}
+input[type=text],input[type=date],input[type=number],input[type=url],input[type=search],input[type=time],select,textarea{border-radius:14px;border:1px solid transparent;background:var(--surface-2);box-shadow:var(--sunk)}
+input:focus,select:focus,textarea:focus{outline:2px solid color-mix(in srgb,var(--accent) 55%,transparent);outline-offset:1px;border-color:transparent;background:var(--surface)}
+.seg button,.pchip,.preset,.chip,.tag{border-radius:999px}
+.seg button{border:none;background:var(--surface);box-shadow:var(--soft-sm);padding:6px 14px}
+.seg button[aria-pressed="true"],.pchip.on,.chip:has(input:checked){background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.chip,.pchip,.preset{background:var(--surface);border-color:var(--line-2)}
+.cat{border-radius:18px;border-color:transparent;background:var(--surface);box-shadow:var(--soft-sm)}
+.cat:has(input:checked){background:var(--accent-soft);box-shadow:inset 0 0 0 1.5px var(--accent)}
+.check input{accent-color:var(--accent)}
+.stub-head{background:var(--accent);color:var(--accent-ink);letter-spacing:.2em}
+.perf::before,.perf::after{background:var(--bg)}
+.row{border-bottom-color:color-mix(in srgb,var(--line) 70%,transparent)}
+.row:hover{background:color-mix(in srgb,var(--accent) 5%,var(--surface))}
+.list .lhead{border-bottom-color:var(--line)}
+.sharebar,.meter{background:var(--surface-2);box-shadow:var(--sunk)}
+.sharebar i{background:var(--load)}
+.meter i{background:linear-gradient(90deg,color-mix(in srgb,var(--load) 75%,var(--surface)),var(--load))}
+.drawer{border-radius:26px 0 0 26px;background:var(--surface)}
+.dw-head{background:color-mix(in srgb,var(--surface) 90%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.scrim{background:color-mix(in srgb,#2b1d16 35%,transparent);backdrop-filter:blur(2px)}
+.toast{border-radius:999px;background:var(--ink);padding:10px 20px}
+.badge{background:var(--st-crit)}
+.capcell.over{animation-name:breatheSoft}
+@keyframes breatheSoft{0%,100%{box-shadow:var(--soft),0 0 0 0 color-mix(in srgb,var(--load) 0%,transparent)}50%{box-shadow:var(--soft),0 0 0 6px color-mix(in srgb,var(--load) 22%,transparent)}}
+.udot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--st-crit);margin-right:8px;vertical-align:middle;box-shadow:0 0 0 3px color-mix(in srgb,var(--st-crit) 18%,transparent)}
+@media (max-width:640px){.page-head h2{font-size:24px}.capcell b{font-size:38px}.drawer{border-radius:0}}
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
 </style>
 <style>
@@ -1451,7 +1534,7 @@ function renderDesk(){
       const sel = x.status === 'Withdrawn' ? statusPill('Withdrawn')
         : `<select data-act="quick-status" data-id="${esc(x.id)}" aria-label="狀態">${OWNER_STATUSES.map(s => `<option value="${s}" ${s === x.status ? 'selected' : ''}>${STATUS[s].zh}</option>`).join('')}</select>`;
       return `<div class="row" role="button" tabindex="0" data-act="open" data-id="${esc(x.id)}">
-        <span class="r-no mono">${esc(x.r.no || x.id)}</span>
+        <span class="r-no mono">${isUnread(x) ? '<span class="udot" title="新需求，還沒點開" aria-label="新需求，還沒點開"></span>' : ''}${esc(x.r.no || x.id)}</span>
         <span class="r-main"><span class="r-title">${esc(x.r.title)} ${flags}</span><span class="r-meta">${rowMeta(x.r)}</span></span>
         <span class="r-due"><span>${esc(showD(x.r.dueDate || x.t.deliveredDate))}</span><small class="${di.cls}">${esc(di.txt)}</small></span>
         <span class="r-urg">${urgPill(x.r.urgency)}</span>
@@ -1493,9 +1576,19 @@ async function quickStatus(id, st){
   else renderCurrent();
 }
 
+/* 未讀紅點：企劃新送、你還沒點開過的需求單（只記在你自己的私人資料區） */
+function isUnread(x){ return !!(S.isOwner && S.seen && !S.demo && x && !x.manual && x.r.createdAt && x.r.createdAt > (S.seen.since || '') && !(S.seen.ids || {})[x.id] && isActive(x.status)); }
+function markSeen(id){
+  const x = findRow(id); if (!isUnread(x) || !S.db) return;
+  S.seen = {...S.seen, ids:{...(S.seen.ids || {}), [id]:new Date().toISOString()}};
+  const doc = S.seen; enqueue('kpiconf/seen', () => S.db.doc('kpiconf/seen').set(doc)).catch(() => {});
+  if (S.view === 'desk') renderDesk(); renderNav();
+}
+
 /* ---------------- DRAWER ---------------- */
 function openDrawer(id, mode='view'){
   S.drawerId = id; S.drawerMode = mode; S.drawerDirty = false; S.armedDelete = false; S.pendingAdj = []; S.loadEdit = false;
+  if (id && S.isOwner) markSeen(id);
   $('#scrim').hidden = false; $('#drawer').hidden = false; document.body.style.overflow = 'hidden';
   renderDrawer();
   setTimeout(() => $('#drawer .x')?.focus(), 0);
@@ -1956,7 +2049,7 @@ const PROGRESS_STEPS = [0, 25, 50, 75, 90, 100];
 const QUICK_EST = [['半天', 4], ['1 天', 8], ['2 天', 16], ['3 天', 24], ['5 天', 40]];
 const AVAIL_LINE = 0.85;
 const bandOf = ratio => LOAD_BANDS.find(b => ratio < b.max) || LOAD_BANDS[LOAD_BANDS.length - 1];
-const bandStyle = b => `background:color-mix(in srgb, var(--st-crit) ${b.pct}%, var(--surface));color:${b.pct >= 66 ? '#fff' : 'var(--ink)'}`;
+const bandStyle = b => `background:color-mix(in srgb, var(--load) ${b.pct}%, var(--surface));color:${b.pct >= 66 ? '#fff' : 'var(--ink)'}`;
 const hrs = n => (Math.round(num(n) * 10) / 10).toString();
 const fmtDays = h => { h = num(h); if (!h) return '—'; return h >= 8 ? `${r1(h / 8)} 天` : `${hrs(h)} 小時`; };
 const fmtEst = h => { h = num(h); if (!h) return '—'; return `${fmtDays(h)}（${hrs(h)}h）`; };
@@ -2995,6 +3088,11 @@ async function boot(){
   }
   if (S.isOwner){
     db.collection('kpi').onSnapshot(snap => { S.kpi = new Map(snap.docs.map(d => [d.id, d.data()])); S.loaded.kpi = true; onData(); }, onErr);
+    db.doc('kpiconf/seen').onSnapshot(snap => {
+      if (snap.exists) S.seen = {since:'', ids:{}, ...snap.data()};
+      else { S.seen = {since:new Date().toISOString(), ids:{}}; if (!S.demo) enqueue('kpiconf/seen', () => db.doc('kpiconf/seen').set(S.seen)).catch(() => {}); }
+      onData();
+    }, onErr);
     db.doc('kpiconf/main').onSnapshot(snap => {
       if (snap.exists){ const c = snap.data(); S.kpiconf = {targets:{...DEFAULT_KPICONF.targets, ...(c.targets || {})}, points:{...DEFAULT_KPICONF.points, ...(c.points || {})}, difficulty:{...DEFAULT_KPICONF.difficulty, ...(c.difficulty || {})}}; fillConf(); }
       onData();
