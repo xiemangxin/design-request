@@ -517,20 +517,26 @@ const CATS = [
   {k:'other',   zh:'其他',         desc:'不在以上類別的需求', unit:'件'},
 ];
 const CAT = Object.fromEntries(CATS.map(c => [c.k, c]));
-const CHANNELS = ['官網','APP','META 廣告','GDN','IG','FB','LINE 推播','LINE Rich Menu','電子看板','異業版位','實體輸出','其他'];
+const CHANNELS = ['官網','APP','META 廣告','GDN','IG','FB','LINE','電子看板','異業版位','實體輸出','其他'];
+// 版位選項：可在「設定」維護（settings.channels），沒設定時用內建清單
+function getChannels(){ const c = S.settings && S.settings.channels; return Array.isArray(c) && c.length ? c : CHANNELS; }
+const chipsHTML = (pfx, selected) => getChannels().map((c, i) => `<label class="chip"><input type="checkbox" id="${pfx}-ch-${i}" value="${esc(c)}" ${(selected || []).includes(c) ? 'checked' : ''}>${esc(c)}</label>`).join('');
 const STAGES = ['','初稿製作中','初稿已提供','Mockup 校稿','修改中','完稿','測試站','正式站上線'];
 const LOG_CAT_RULES = [
   [/簡報/,'slides'], [/範本|訓練|需求單|考核/,'internal'], [/動態|影片|短影音/,'motion'], [/流程圖|說明圖/,'flow'],
   [/resize/i,'resize'], [/KV|主視覺/i,'kv'], [/情境圖|修圖|去背/,'retouch'], [/桌曆|手帳|桌墊曆|貼紙|小卡|DM|桌卡|立牌|輸出/,'print'],
   [/更新|停站|Logo|mega menu|移除|公告頁/i,'webupd'], [/活動頁|策展頁|Mockup|測試站|正式站|官方網站|網頁|切版/i,'web'],
 ];
-const LOG_CH_RULES = [[/推播|LINE廣宣/,'LINE 推播'],[/rich ?menu/i,'LINE Rich Menu'],[/GDN/,'GDN'],[/APP/,'APP'],[/官網|官方網站|首頁/,'官網'],[/電子看板/,'電子看板'],[/異業/,'異業版位']];
+const LOG_CH_RULES = [[/推播|LINE廣宣|LINE|rich ?menu/i,'LINE'],[/GDN/,'GDN'],[/APP/,'APP'],[/官網|官方網站|首頁/,'官網'],[/電子看板/,'電子看板'],[/異業/,'異業版位']];
 const PRESETS = [
   ['官網','官網 Banner','1200×828',1],
   ['官網','官網 Banner','1084×320',1],
   ['官網','官網 Banner','800×1000',1],
   ['APP','APP Banner','1170×1008',1],
   ['APP','APP Banner','400×400',4],
+  ['LINE','LINE 推播','1040×1040',1],
+  ['LINE','LINE 推播','1040×不限',1],
+  ['LINE','LINE RICHMENU風格選','1247×1230',1],
   ['FB','FB 貼文','1200×1200',1],
   ['FB','FB 貼文','1200×800',1],
   ['FB','FB 封面（安全範圍 820×312）','1200×676',1],
@@ -846,7 +852,7 @@ function formHTML(){
       <section class="card fsec">
         <h3 class="fs-h">版位與規格</h3>
         <div class="field"><span class="lbl req">使用區域／版位</span>
-          <div class="chips" id="f-channels">${CHANNELS.map((c,i) => `<label class="chip"><input type="checkbox" id="f-ch-${i}" value="${esc(c)}">${esc(c)}</label>`).join('')}</div>
+          <div class="chips" id="f-channels">${chipsHTML('f', [])}</div>
           <span class="err" data-err="channels" hidden></span>
         </div>
         <div class="field"><span class="lbl">常用尺寸快速帶入</span>
@@ -914,6 +920,11 @@ function readForm(){
 }
 function patchForm(){
   const sec = $('#v-new'); if (!sec.dataset.built) return;
+  const chBox = $('#f-channels', sec); const chSig = getChannels().join('|');
+  if (chBox && chBox.dataset.sig !== chSig){
+    const keep = $$('input:checked', chBox).map(i => i.value);
+    chBox.innerHTML = chipsHTML('f', keep); chBox.dataset.sig = chSig; renderPresets();
+  }
   $('.js-rules', sec).innerHTML = `<h3>注意事項</h3><ol>${rulesText().map(r => `<li>${esc(r)}</li>`).join('')}</ol>`;
   // company field: select when a list exists, else free text
   const box = $('.js-company', sec);
@@ -1434,7 +1445,7 @@ function editDrawer(x){
   const r = x.r;
   return `<form class="dw-sec" id="edit-form" novalidate>
     <div class="field"><label class="req" for="e-title">專案／檔期名稱</label><input type="text" id="e-title" value="${esc(r.title)}"></div>
-    <div class="field"><span class="lbl">使用區域／版位</span><div class="chips">${CHANNELS.map((c,i) => `<label class="chip"><input type="checkbox" id="e-ch-${i}" value="${esc(c)}" ${(r.channels || []).includes(c) ? 'checked' : ''}>${esc(c)}</label>`).join('')}</div></div>
+    <div class="field"><span class="lbl">使用區域／版位</span><div class="chips">${chipsHTML('e', r.channels)}${(r.channels || []).filter(c => !getChannels().includes(c)).map((c, i) => `<label class="chip"><input type="checkbox" id="e-chx-${i}" value="${esc(c)}" checked>${esc(c)}</label>`).join('')}</div></div>
     <div class="field"><span class="lbl req">設計需求明細</span>${itemsEditorHTML('e', r.items)}</div>
     <div class="field"><label for="e-specs-note">其他說明</label><textarea id="e-specs-note" rows="3">${esc(Array.isArray(r.items) ? (r.specsNote || '') : (r.specs || ''))}</textarea></div>
     <div class="row2">
@@ -2041,7 +2052,8 @@ function renderSetup(){
           </div>
           <div class="field"><label for="s-companies">業務單位選項</label><textarea id="s-companies" rows="3" placeholder="每行一個"></textarea><span class="hint">表單會自動加上「其他（請輸入）」選項；留空時改成自由填寫。</span></div>
           <div class="field"><label for="s-holidays">國定假日</label><textarea id="s-holidays" rows="6" class="mono" placeholder="每行一個日期，可加說明&#10;2027-01-01 元旦" style="font-size:13px"></textarea><span class="hint">計算 D+n 工作天與收單截止日時會排除這些日期（週末已自動排除）。請依行政院人事行政總處公告的行事曆補齊，補班日目前不另計。</span></div>
-          <div class="field"><label for="s-presets">常用尺寸</label><textarea id="s-presets" rows="10" class="mono" style="font-size:13px" spellcheck="false" placeholder="版位 | 名稱 | 尺寸&#10;官網 | 官網 Banner | 1200×828"></textarea><span class="hint">每行一個：<span class="inline-code">版位 | 名稱 | 尺寸</span>。版位要和表單上的版位選項同名，屬於多個版位用 / 分隔（例：<span class="inline-code">IG/FB | 限時動態 | 1080×1920</span>）。企劃選了版位後，就會出現這裡對應的尺寸。</span><span class="hint js-preset-warn" style="color:var(--crit-ink)"></span></div>
+          <div class="field"><label for="s-channels">版位選項</label><textarea id="s-channels" rows="4" placeholder="每行一個"></textarea><span class="hint">表單上「使用區域／版位」的選項，每行一個，順序就是顯示順序。</span></div>
+          <div class="field"><label for="s-presets">常用尺寸</label><textarea id="s-presets" rows="10" class="mono" style="font-size:13px" spellcheck="false" placeholder="版位 | 名稱 | 尺寸&#10;官網 | 官網 Banner | 1200×828"></textarea><span class="hint">每行一個：<span class="inline-code">版位 | 名稱 | 尺寸</span>。屬於多個版位用 / 分隔（例：<span class="inline-code">IG/FB | 限時動態 | 1080×1920</span>）；尺寸可寫「不限」等文字。寫了「版位選項」裡沒有的版位，儲存時會自動加進版位選項。</span><span class="hint js-preset-warn" style="color:var(--crit-ink)"></span></div>
           <div class="field"><label for="s-rules">注意事項</label><textarea id="s-rules" rows="6" placeholder="每行一條"></textarea><span class="hint">每行一條，<span class="inline-code">{approver}</span> 會自動換成特急件同意人。</span></div>
           <div class="dw-actions"><button type="submit" class="btn primary">儲存設定</button></div>
         </form>
@@ -2081,6 +2093,7 @@ function fillSetup(force){
   const s = S.settings;
   $('#s-designer').value = s.designer || ''; $('#s-approver').value = s.approver || ''; $('#s-cutoff').value = s.cutoff || '16:30';
   $('#s-presets').value = presetsText(getPresets());
+  $('#s-channels').value = getChannels().join('\n');
   $('#s-companies').value = (s.companies || []).join('\n'); $('#s-holidays').value = (s.holidays || []).join('\n'); $('#s-rules').value = (s.rules || []).join('\n');
 }
 async function saveSetup(ev){
@@ -2091,11 +2104,16 @@ async function saveSetup(ev){
   const bad = hol.filter(l => !parseD(l.slice(0,10)));
   if (bad.length){ toast(`日期格式需為 YYYY-MM-DD：${bad[0]}`); return; }
   const pp = parsePresets($('#s-presets').value);
-  const unknown = [...new Set(pp.out.flatMap(x => x.ch).filter(c => !CHANNELS.includes(c)))];
+  const chList = lines('s-channels').length ? lines('s-channels') : [...CHANNELS];
+  const unknown = [...new Set(pp.out.flatMap(x => x.ch).filter(c => !chList.includes(c)))];
+  const insertAt = chList.indexOf('其他') >= 0 ? chList.indexOf('其他') : chList.length;
+  chList.splice(insertAt, 0, ...unknown);
   const warn = $('.js-preset-warn');
   if (pp.bad.length){ warn.textContent = `常用尺寸有 ${pp.bad.length} 行格式不對：${pp.bad[0]}`; toast('常用尺寸格式需為「版位 | 名稱 | 尺寸」'); return; }
-  warn.textContent = unknown.length ? `提醒：版位「${unknown.join('、')}」不在表單的版位選項中，這些尺寸不會出現。` : '';
-  const s = {presets:pp.out, designer:$('#s-designer').value.trim(), approver:$('#s-approver').value.trim() || '主管', cutoff:$('#s-cutoff').value || '16:30', companies:lines('s-companies'), holidays:hol.sort(), rules:lines('s-rules')};
+  warn.textContent = unknown.length ? `已自動新增版位：${unknown.join('、')}` : '';
+  warn.style.color = 'var(--good-ink)';
+  $('#s-channels').value = chList.join('\n');
+  const s = {channels:chList, presets:pp.out, designer:$('#s-designer').value.trim(), approver:$('#s-approver').value.trim() || '主管', cutoff:$('#s-cutoff').value || '16:30', companies:lines('s-companies'), holidays:hol.sort(), rules:lines('s-rules')};
   S.settings = {...DEFAULT_SETTINGS, ...s}; refreshHolidays();
   try { await enqueue('settings/main', () => S.db.doc('settings/main').set(s)); delete $('#setup-form').dataset.dirty; toast('已儲存設定'); renderNav(); }
   catch(e){ handleWriteError(e); }
