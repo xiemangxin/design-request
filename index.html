@@ -245,6 +245,12 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);outline-
 .pgroup{display:grid;grid-template-columns:72px minmax(0,1fr);gap:10px;align-items:start}
 .pg-l{font-size:12px;font-weight:700;color:var(--ink-3);padding-top:4px}
 @media (max-width:520px){ .pgroup{grid-template-columns:minmax(0,1fr);gap:4px} }
+table.wk{min-width:1280px}
+table.wk td{padding:6px 6px;vertical-align:top}
+table.wk textarea,table.wk select,table.wk input{font-size:13px;padding:5px 7px;min-height:0}
+table.wk textarea{min-width:140px;resize:vertical;line-height:1.5}
+table.wk td:nth-child(1) select{width:96px}
+table.wk td:nth-child(6) select{width:112px}
 /* drawer */
 .scrim{position:fixed;inset:0;background:color-mix(in srgb,#000 45%,transparent);z-index:40}
 .drawer{position:fixed;top:0;right:0;bottom:0;width:min(580px,100%);background:var(--surface);z-index:41;overflow-y:auto;box-shadow:var(--shadow);display:grid;align-content:start}
@@ -374,6 +380,7 @@ html.gated body>header,html.gated body>main{display:none}
   <section id="v-board" class="view" hidden></section>
   <section id="v-desk" class="view" hidden></section>
   <section id="v-kpi" class="view" hidden></section>
+  <section id="v-weekly" class="view" hidden></section>
   <section id="v-setup" class="view" hidden></section>
 </main>
 
@@ -560,8 +567,8 @@ const URG = {
 };
 const DELAY = {'':'—（準時或未延遲）', requester:'需求端資料延遲', designer:'設計端', force:'不可抗力／需求變更'};
 const DIFF = {easy:'簡單', normal:'標準', hard:'複雜'};
-const VIEWS = ['new','board','desk','kpi','setup'];
-const OWNER_VIEWS = ['desk','kpi','setup'];
+const VIEWS = ['new','board','desk','weekly','kpi','setup'];
+const OWNER_VIEWS = ['desk','weekly','kpi','setup'];
 const DEFAULT_SETTINGS = {
   designer:'', approver:'婷婷', cutoff:'16:30', companies:[], holidays:[],
   rules:[
@@ -750,7 +757,7 @@ function handleWriteError(e){
 /* ---------------- nav & notices ---------------- */
 function renderNav(){
   const tabs = [['new','填寫需求'],['board','進度看板']];
-  if (S.isOwner) tabs.push(['desk','工作台'],['kpi','KPI 結算'],['setup','設定']);
+  if (S.isOwner) tabs.push(['desk','工作台'],['weekly','週報'],['kpi','KPI 結算'],['setup','設定']);
   $('#tabs').innerHTML = tabs.map(([v, l]) =>
     `<button class="tab" data-view="${v}" ${S.view === v ? 'aria-current="page"' : ''}>${esc(l)}${OWNER_VIEWS.includes(v) ? '<span class="lk">僅你</span>' : ''}</button>`).join('');
   const who = $('#who');
@@ -790,6 +797,7 @@ function renderCurrent(){
   else if (v === 'desk') renderDesk();
   else if (v === 'kpi') renderKpi();
   else if (v === 'setup') renderSetup();
+  else if (v === 'weekly') renderWeekly();
 }
 function onData(){
   renderNav(); renderNotices();
@@ -1653,6 +1661,87 @@ async function runImport(btn){
   toast(`已匯入 ${n} 筆紀錄`); S.imp = null; closeDrawer(); renderCurrent();
 }
 
+/* ---------------- WEEKLY REPORT (owner) ---------------- */
+const WTYPES = ['重要專案','專案','其他'];
+const WSTATUS = ['on time','done','not started','delay','postponed'];
+const defaultWType = cat => ({web:'重要專案', tool:'重要專案', kv:'專案', print:'專案', slides:'專案', flow:'專案', motion:'專案'})[cat] || '其他';
+function nextFriday(){ const t = today0(); return addDays(t, (5 - t.getDay() + 7) % 7); }
+const fmtSlash = s => { const d = parseD(s); return d ? `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}` : ''; };
+function wAuto(x){
+  const r = x.r, t = x.t;
+  let content;
+  if (Array.isArray(r.items) && r.items.length){
+    const lines = r.items.map(it => [it.name, it.size, it.qty ? '×' + it.qty : ''].filter(Boolean).join(' '));
+    content = (lines.length > 1 ? lines.map((l, i) => `${i+1}. ${l}`) : lines).join('\n');
+  } else if (r.specs && !x.manual) content = String(r.specs);
+  else content = `${CAT[r.category]?.zh || ''}${num(r.qty, 1) > 1 ? ' ×' + num(r.qty, 1) : ''}`;
+  let status;
+  if (x.status === 'Done') status = 'done';
+  else if (x.status === 'Delay') status = 'delay';
+  else if (x.status === 'Postponed') status = 'postponed';
+  else if (x.status === 'Open' && !t.stage) status = 'not started';
+  else { const d = parseD(r.dueDate); status = d && d < today0() ? 'delay' : 'on time'; }
+  return {type:defaultWType(r.category), title:r.title || '', content, progress:t.stage || (x.status === 'Done' ? '已交件' : '-'), blocker:'無', status, due:fmtSlash(t.eta || r.dueDate || t.deliveredDate) || 'TBC', next:'-'};
+}
+function weeklyRows(){
+  const fri = parseD(S.weekFri) || nextFriday(); const from = addDays(fri, -6);
+  const order = t => WTYPES.indexOf(t);
+  return allRows(true).filter(x => !x.gone && x.status !== 'Withdrawn' && x.status !== 'Cancel')
+    .filter(x => !(x.k && x.k.weekly && x.k.weekly.hide))
+    .filter(x => { if (isActive(x.status)) return true; if (x.status === 'Done'){ const d = parseD(x.t.deliveredDate); return d && d >= from && d <= fri; } return false; })
+    .map(x => { const a = wAuto(x); const w = (x.k && x.k.weekly) || {}; const v = {}; for (const k of Object.keys(a)) v[k] = (w[k] !== undefined && w[k] !== '') ? w[k] : a[k]; return {x, v, a}; })
+    .sort((p, q) => (order(p.v.type) - order(q.v.type)) || String(p.x.r.dueDate || '9999').localeCompare(String(q.x.r.dueDate || '9999')));
+}
+function renderWeekly(){
+  const sec = $('#v-weekly');
+  if (!S.weekFri) S.weekFri = fmtD(nextFriday());
+  if (!sec.dataset.built){
+    sec.innerHTML = `
+      <div class="page-head"><div><h2>週報</h2><p class="sub">依週五開會日，列出進行中與本週完成的工作，欄位對應周報 Excel 的個人頁籤。欄位可直接修改，會自動儲存；按「複製到 Excel」後，到周報點 A2 貼上即可。</p></div>
+        <div class="dw-actions"><button class="btn sm" data-act="wk-prev">‹ 上一週</button><input type="date" id="wk-fri" style="width:auto"><button class="btn sm" data-act="wk-next">下一週 ›</button></div></div>
+      <div class="toolbar"><button class="btn primary" data-act="wk-copy">複製到 Excel</button><button class="btn" data-act="wk-csv">下載 CSV</button><span class="grow"></span><span class="hint js-wk-count"></span></div>
+      <div class="tablewrap"><table class="wk"><thead><tr><th>工作類型</th><th>項目名稱</th><th>內容簡述</th><th>本週進度</th><th>卡點／需協助事項</th><th>目前狀態</th><th>預計完成日</th><th>下週預計完成事項</th><th></th></tr></thead><tbody class="js-wk"></tbody></table></div>
+      <p class="hint">「本週進度」預設帶入製作階段；「目前狀態」依進度自動判斷（待處理＝not started、超過完稿日＝delay）。按 × 可把該項從週報移除（不影響工作台），清空欄位會恢復自動值。</p>`;
+    sec.dataset.built = '1';
+  }
+  $('#wk-fri').value = S.weekFri;
+  const act = document.activeElement; const keep = act && act.closest && act.closest('#v-weekly .js-wk') ? [act.dataset.id, act.dataset.f, act.selectionStart] : null;
+  const rows = weeklyRows();
+  $('.js-wk-count', sec).textContent = `共 ${rows.length} 項`;
+  const ta = (id, f, v, auto) => `<textarea data-wk="1" data-id="${esc(id)}" data-f="${f}" rows="${Math.min(5, Math.max(2, String(v).split('\n').length))}" placeholder="${esc(auto)}">${esc(v)}</textarea>`;
+  $('.js-wk', sec).innerHTML = rows.length ? rows.map(({x, v, a}) => `<tr>
+    <td><select data-wk="1" data-id="${esc(x.id)}" data-f="type">${WTYPES.map(t => `<option ${t === v.type ? 'selected' : ''}>${t}</option>`).join('')}</select></td>
+    <td>${ta(x.id, 'title', v.title, a.title)}<div class="mono muted" style="font-size:11px">${esc(x.r.no || x.id)}</div></td>
+    <td>${ta(x.id, 'content', v.content, a.content)}</td>
+    <td>${ta(x.id, 'progress', v.progress, a.progress)}</td>
+    <td>${ta(x.id, 'blocker', v.blocker, a.blocker)}</td>
+    <td><select data-wk="1" data-id="${esc(x.id)}" data-f="status">${WSTATUS.map(t => `<option ${t === v.status ? 'selected' : ''}>${t}</option>`).join('')}</select></td>
+    <td><input type="text" data-wk="1" data-id="${esc(x.id)}" data-f="due" value="${esc(v.due)}" placeholder="${esc(a.due)}" style="width:110px"></td>
+    <td>${ta(x.id, 'next', v.next, a.next)}</td>
+    <td><button class="it-del" data-act="wk-hide" data-id="${esc(x.id)}" aria-label="從週報移除">×</button></td></tr>`).join('')
+    : `<tr><td colspan="9"><div class="empty"><b>這一週沒有可列入週報的工作</b><span>進行中的工作，或在這週完成的工作會出現在這裡。</span></div></td></tr>`;
+  if (keep){ const el = $(`#v-weekly [data-id="${CSS.escape(keep[0])}"][data-f="${keep[1]}"]`); if (el){ el.focus(); if (keep[2] != null && el.setSelectionRange) try { el.setSelectionRange(keep[2], keep[2]); } catch(_){} } }
+}
+async function saveWeekly(id, patch){
+  const x = findRow(id); if (!x) return;
+  const w = {...((x.k && x.k.weekly) || {}), ...patch, updatedAt:new Date().toISOString()};
+  if (x.manual) await writeManual(id, {...x.k, weekly:w}); else await writeKpi(id, {weekly:w});
+}
+function weeklyMatrix(){
+  return weeklyRows().map(({v}) => [v.type, v.title, v.content, v.progress, v.blocker, v.status, v.due, v.next]);
+}
+function weeklyTSV(){
+  const cell = s => { s = String(s ?? ''); return /[\t\n"]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+  return weeklyMatrix().map(r => r.map(cell).join('\t')).join('\r\n');
+}
+async function weeklyCSV(){
+  if (!S.downloads){ toast('這個檢視無法下載檔案'); return; }
+  const cell = s => { s = String(s ?? ''); return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+  const head = ['工作類型','項目名稱','內容簡述','本週進度（如需討論可放連結）','卡點／需協助事項','目前狀態','預計完成日','下週預計完成事項'];
+  const csv = '﻿' + [head, ...weeklyMatrix()].map(r => r.map(cell).join(',')).join('\r\n');
+  try { await S.downloads.save({filename:`週報_${S.weekFri.replaceAll('-', '')}.csv`, data:new Blob([csv], {type:'text/csv'})}); } catch(e){ if (e && e.code !== 'declined') toast('下載失敗'); }
+}
+
 /* ---------------- KPI ---------------- */
 function currentPeriod(){ const t = today0(); return {y:t.getFullYear(), h: t.getMonth() < 6 ? 1 : 2}; }
 function periodRange(p){ return p.h === 1 ? [new Date(p.y,0,1), new Date(p.y,5,30)] : [new Date(p.y,6,1), new Date(p.y,11,31)]; }
@@ -1995,6 +2084,15 @@ document.addEventListener('click', ev => {
   if (tab){ location.hash = tab.dataset.view; return; }
   const fb = ev.target.closest('[data-filter]');
   if (fb){ const st = fb.closest('#v-desk') ? S.desk : S.board; st.status = fb.dataset.filter; renderCurrent(); return; }
+  const wa = ev.target.closest('[data-act^="wk-"]');
+  if (wa){
+    const act = wa.dataset.act;
+    if (act === 'wk-prev' || act === 'wk-next'){ S.weekFri = fmtD(addDays(parseD(S.weekFri) || nextFriday(), act === 'wk-prev' ? -7 : 7)); renderWeekly(); }
+    else if (act === 'wk-copy') copyText(weeklyTSV());
+    else if (act === 'wk-csv') weeklyCSV();
+    else if (act === 'wk-hide'){ saveWeekly(wa.dataset.id, {hide:true}).then(() => { renderWeekly(); toast('已從週報移除'); }); }
+    return;
+  }
   const so = ev.target.closest('[data-sort]');
   if (so){
     const st = so.closest('#v-desk') ? S.desk : S.board; const k = so.dataset.sort;
@@ -2069,6 +2167,8 @@ document.addEventListener('click', ev => {
 });
 document.addEventListener('change', ev => {
   const t = ev.target;
+  if (t.id === 'wk-fri'){ if (parseD(t.value)) { S.weekFri = t.value; renderWeekly(); } return; }
+  if (t.dataset && t.dataset.wk){ saveWeekly(t.dataset.id, {[t.dataset.f]: t.value.trim()}); return; }
   if (t.matches('select[data-act="quick-status"]')){ quickStatus(t.dataset.id, t.value); return; }
   if (t.id === 'f-company'){ const o = $('#f-company-other'); if (o){ o.hidden = t.value !== OTHER_BU; if (!o.hidden) o.focus(); } }
   if (t.id === 'backup-file' && t.files && t.files[0]){ importBackup(t.files[0]); t.value = ''; return; }
