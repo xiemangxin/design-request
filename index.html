@@ -259,7 +259,7 @@ table.wk td:nth-child(6) select{width:112px}
 .cap-k{font-size:13px;font-weight:700;opacity:.85}
 .cap-d,.cap-h{font-size:13px;opacity:.85}
 .strip2{display:grid;gap:12px}
-.strip-w{display:grid;grid-template-columns:44px minmax(0,1fr);gap:10px;align-items:center}
+.strip-w{display:grid;grid-template-columns:64px minmax(0,1fr);gap:10px;align-items:center}
 .strip-d{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
 .dcell{border-radius:8px;padding:8px;display:grid;gap:2px;font-size:12px;border:1px solid var(--line);min-width:0}
 .dcell b{font-size:15px}
@@ -273,6 +273,32 @@ table.wk td:nth-child(6) select{width:112px}
 input.cap-ov{width:84px;padding:4px 8px;font-size:13px}
 ul.plain{list-style:none;margin:0;padding:0;display:grid;gap:6px;font-size:14px}
 @media (max-width:640px){ .capgrid{grid-template-columns:minmax(0,1fr)} .strip-w{grid-template-columns:minmax(0,1fr)} .dcell b{font-size:13px} .dcell{padding:6px} }
+.tag.est{border-color:var(--st-warn);background:color-mix(in srgb,var(--st-warn) 22%,var(--surface));color:var(--ink)}
+.cap-av{font-size:13px;font-weight:700;margin-top:4px}
+.capmeta{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;font-size:13px;color:var(--ink-2)}
+button.dcell{font:inherit;text-align:left;cursor:pointer}
+.dcell.sel{outline:2px solid var(--ink);outline-offset:1px}
+.dcell.past{opacity:.55}
+.daydetail{margin-top:12px;border-top:1px solid var(--line);padding-top:10px;display:grid;gap:6px;font-size:13px}
+.attn{border-color:color-mix(in srgb,var(--st-warn) 55%,var(--line))}
+.attn li{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline}
+.pchips,.qchips{display:flex;flex-wrap:wrap;gap:4px}
+.pchip{appearance:none;border:1px solid var(--line-2);background:var(--surface);border-radius:999px;padding:2px 9px;font-size:12px;cursor:pointer;color:var(--ink-2);font-family:var(--f-mono)}
+.qchips .pchip{font-family:var(--f-body);font-size:13px;padding:4px 12px}
+.pchip:hover{border-color:var(--accent);color:var(--accent)}
+.pchip.on{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+table.ck td{vertical-align:middle}
+table.ck td:nth-child(4){min-width:300px}
+.lsum{display:grid;grid-template-columns:repeat(auto-fit,minmax(84px,1fr));gap:8px}
+.lsum div{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px;display:grid;gap:2px;min-width:0}
+.lsum span{font-size:12px;color:var(--ink-3)}
+.lsum b{font-size:14px;overflow-wrap:anywhere}
+.lform{display:grid;gap:12px;border:1px solid var(--line-2);border-radius:10px;padding:12px;background:var(--surface)}
+.sugbox{display:grid;gap:2px}
+.sugbox b{font-size:22px;font-family:var(--f-display)}
+.preview{display:grid;gap:8px;font-size:14px}
+.preview .pv{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.bchip{display:inline-block;border-radius:6px;padding:1px 9px;font-size:12px;font-weight:700;border:1px solid var(--line)}
 /* drawer */
 .scrim{position:fixed;inset:0;background:color-mix(in srgb,#000 45%,transparent);z-index:40}
 .drawer{position:fixed;top:0;right:0;bottom:0;width:min(580px,100%);background:var(--surface);z-index:41;overflow-y:auto;box-shadow:var(--shadow);display:grid;align-content:start}
@@ -739,7 +765,7 @@ function rulesText(){ return (S.settings.rules || []).map(r => String(r).replace
 const S = {
   db:null, user:null, downloads:null, uid:null, isOwner:false, canWrite:null, readOnly:false,
   identityKnown:false, conn:'loading', loaded:{requests:false, track:false},
-  requests:new Map(), track:new Map(), kpi:new Map(), busy:new Map(), load:new Map(), loadconf:{meetingHours:4, leaves:[]}, isManager:false, pendingAdj:[],
+  requests:new Map(), track:new Map(), kpi:new Map(), busy:new Map(), load:new Map(), loadconf:{meetingHours:4, leaves:[]}, isManager:false, pendingAdj:[], loadEdit:false, capDay:null, capConfOpen:false, triage:null,
   settings:{...DEFAULT_SETTINGS}, kpiconf:structuredClone(DEFAULT_KPICONF),
   view:null, demo:false, demoData:null,
   board:{status:'active', mine:false, q:'', sort:null}, desk:{status:'active', q:'', sort:null},
@@ -838,7 +864,8 @@ function onData(){
   renderNav(); renderNotices();
   if (S.view === 'new'){ patchForm(); renderPresets(); } else renderCurrent();
   refreshItemNames();
-  if (S.drawerId && !S.drawerDirty) renderDrawer();
+  if (S.drawerId && !S.drawerDirty && !S.loadEdit) renderDrawer();
+  if (S.isOwner) scheduleSuggestSync();
 }
 
 /* ---------------- NEW REQUEST FORM ---------------- */
@@ -1330,6 +1357,8 @@ function renderDesk(){
       <div class="strip js-strip"></div>
       <div class="toolbar">
         <div class="seg js-filter">${FILTERS.map(([k,l]) => `<button data-filter="${k}">${l}</button>`).join('')}</div>
+        <label class="check" style="font-size:13px;align-items:center"><input type="checkbox" id="d-needest">只看待評估</label>
+        <button class="btn sm primary js-triage" data-act="triage-open" hidden></button>
         <span class="grow"></span>
         <span class="js-msort"></span><input type="search" id="d-q" placeholder="搜尋專案、編號、企劃">
       </div>
@@ -1341,13 +1370,17 @@ function renderDesk(){
   $('.js-strip', sec).innerHTML = stripHTML(rows);
   $$('.js-filter button', sec).forEach(b => b.setAttribute('aria-pressed', String(b.dataset.filter === S.desk.status)));
   $('.js-msort', sec).innerHTML = sortSelect(S.desk, 'd-sort');
-  const list = sortRows(filterBy(rows, S.desk.status, S.desk.q), S.desk.sort);
+  const tq = S.isOwner && !S.demo ? triageQueue() : [];
+  const tb = $('.js-triage', sec); tb.hidden = !tq.length; tb.textContent = `評估 ${tq.length} 件時數`;
+  $('#d-needest').checked = !!S.desk.needEst;
+  let list = sortRows(filterBy(rows, S.desk.status, S.desk.q), S.desk.sort);
+  if (S.desk.needEst) list = list.filter(x => tq.includes(x.id));
   const L = $('.js-list', sec);
   if (!rows.length){ L.innerHTML = loadingOrEmpty().replace('填寫第一張需求', '先試填一張'); return; }
   if (!list.length){ L.innerHTML = loadingOrEmpty('filtered'); return; }
   L.innerHTML = listHead(S.desk) +
     list.map(x => { const di = dueInfo(x);
-      const flags = [x.manual ? '<span class="tag">自行登錄</span>' : '', x.t.stage && isActive(x.status) ? `<span class="tag">${esc(x.t.stage)}</span>` : '', x.r.offSchedule ? '<span class="tag warn">插件</span>' : '', x.r.backfill ? '<span class="tag">補填</span>' : '', x.r.edits ? `<span class="tag">變更 ${num(x.r.edits)}</span>` : '', x.r.rating ? `<span class="tag">★ ${num(x.r.rating)}</span>` : ''].join(' ');
+      const flags = [estTag(x), x.manual ? '<span class="tag">自行登錄</span>' : '', x.t.stage && isActive(x.status) ? `<span class="tag">${esc(x.t.stage)}</span>` : '', x.r.offSchedule ? '<span class="tag warn">插件</span>' : '', x.r.backfill ? '<span class="tag">補填</span>' : '', x.r.edits ? `<span class="tag">變更 ${num(x.r.edits)}</span>` : '', x.r.rating ? `<span class="tag">★ ${num(x.r.rating)}</span>` : ''].join(' ');
       const sel = x.status === 'Withdrawn' ? statusPill('Withdrawn')
         : `<select data-act="quick-status" data-id="${esc(x.id)}" aria-label="狀態">${OWNER_STATUSES.map(s => `<option value="${s}" ${s === x.status ? 'selected' : ''}>${STATUS[s].zh}</option>`).join('')}</select>`;
       return `<div class="row" role="button" tabindex="0" data-act="open" data-id="${esc(x.id)}">
@@ -1382,26 +1415,26 @@ async function quickStatus(id, st){
   const x = findRow(id);
   if (x && x.manual){
     const doc = {...x.k, status:st}; if (st === 'Done' && !doc.deliveredDate) doc.deliveredDate = fmtD(today0());
-    if (await writeManual(id, doc)){ toast(`已改為「${STATUS[st].zh}」`); if (S.load.has(id)) writeLoad(id, st === 'On going' && !S.load.get(id).startDate ? {startDate:fmtD(today0())} : {}); } else renderCurrent();
+    if (await writeManual(id, doc)){ toast(`已改為「${STATUS[st].zh}」`); loadStatusSync(id, st); } else renderCurrent();
     return;
   }
   const patch = {status:st};
   const prev = S.track.get(id) || {};
   if (st === 'Done' && !prev.deliveredDate) patch.deliveredDate = fmtD(today0());
   const ok = await writeTrack(id, patch);
-  if (ok){ if (st === 'Done') await writeKpi(id, {}); toast(`已改為「${STATUS[st].zh}」`); if (S.load.has(id)) writeLoad(id, st === 'On going' && !S.load.get(id).startDate ? {startDate:fmtD(today0())} : {}); }
+  if (ok){ if (st === 'Done') await writeKpi(id, {}); toast(`已改為「${STATUS[st].zh}」`); loadStatusSync(id, st); }
   else renderCurrent();
 }
 
 /* ---------------- DRAWER ---------------- */
 function openDrawer(id, mode='view'){
-  S.drawerId = id; S.drawerMode = mode; S.drawerDirty = false; S.armedDelete = false; S.pendingAdj = [];
+  S.drawerId = id; S.drawerMode = mode; S.drawerDirty = false; S.armedDelete = false; S.pendingAdj = []; S.loadEdit = false;
   $('#scrim').hidden = false; $('#drawer').hidden = false; document.body.style.overflow = 'hidden';
   renderDrawer();
   setTimeout(() => $('#drawer .x')?.focus(), 0);
 }
 function closeDrawer(){
-  S.drawerId = null; S.drawerDirty = false;
+  S.drawerId = null; S.drawerDirty = false; S.loadEdit = false; if (S.drawerMode === 'triage'){ S.triage = null; S.drawerMode = 'view'; renderCurrent(); }
   $('#scrim').hidden = true; $('#drawer').hidden = true; document.body.style.overflow = '';
 }
 function findRow(id){ return allRows(true).find(x => x.id === id) || null; }
@@ -1440,12 +1473,13 @@ function progressHTML(x){
 function renderDrawer(){
   const dw = $('#drawer');
   if (S.drawerMode === 'import'){ dw.innerHTML = importDrawer(); return; }
+  if (S.drawerMode === 'triage'){ dw.innerHTML = triageHTML(); return; }
   if (S.drawerMode === 'manual-new'){ dw.innerHTML = `<div class="dw-head"><div style="display:grid;gap:4px"><span class="mono muted" style="font-size:12px">NEW LOG</span><h3 id="dw-title">自行登錄工作</h3></div><button class="btn sm x" data-act="close">關閉</button></div><div class="dw-body">${manualForm(null)}</div>`; return; }
   const x = findRow(S.drawerId);
   if (!x){ dw.innerHTML = `<div class="dw-head"><h3 id="dw-title">找不到這張需求</h3><button class="btn sm x" data-act="close">關閉</button></div><div class="dw-body"><p class="muted">它可能已被刪除。</p></div>`; return; }
   const head = `<div class="dw-head"><div style="display:grid;gap:4px;min-width:0"><span class="mono muted" style="font-size:12px">${esc(x.r.no || x.id)}</span><h3 id="dw-title">${esc(x.r.title)}</h3><div style="display:flex;gap:6px;flex-wrap:wrap">${statusPill(x.status)} ${urgPill(x.r.urgency)}</div></div><button class="btn sm x" data-act="close">關閉</button></div>`;
   let body;
-  if (S.isOwner) body = x.manual ? manualForm(x) : ownerDrawer(x);
+  if (S.isOwner) body = `<section class="dw-sec" id="load-card">${loadCardHTML(x)}</section>` + (x.manual ? manualForm(x) : ownerDrawer(x));
   else if (S.drawerMode === 'edit') body = editDrawer(x);
   else body = viewerDrawer(x);
   dw.innerHTML = head + `<div class="dw-body">${body}</div>`;
@@ -1537,7 +1571,6 @@ function ownerDrawer(x){
     <div class="field"><label for="o-reply">給企劃的回覆</label><textarea id="o-reply" rows="2" placeholder="例：初稿 12/2 提供，需補商品去背圖">${esc(t.reply || '')}</textarea></div>
     <div class="field"><label for="o-link">交件位置</label><textarea id="o-link" rows="2" class="mono" style="font-size:13px" spellcheck="false" placeholder="網芳路徑或雲端連結，多個位置請換行&#10;例：\\\\everrich.net\\nas14\\…\\@完稿">${esc(t.deliverLink || '')}</textarea></div>
 
-    ${loadFieldsHTML(x)}
     ${kpiFieldsHTML(r, k, late)}
     <div class="dw-actions"><button type="submit" class="btn primary">儲存</button><span class="grow"></span>
       <button type="button" class="btn danger ${S.armedDelete ? 'armed' : ''}" data-act="delete">${S.armedDelete ? '確定刪除？再按一次' : '刪除這張需求'}</button></div>
@@ -1557,13 +1590,13 @@ async function saveOwner(ev){
   const kpiPatch = readKpiFields();
   const ok1 = x.gone ? true : await writeTrack(x.id, trackPatch);
   const ok2 = await writeKpi(x.id, kpiPatch);
-  const lp = readLoadFields(x, st); const ok3 = lp ? await writeLoad(x.id, lp) : true;
-  if (ok1 && ok2 && ok3){ S.pendingAdj = []; S.drawerDirty = false; toast('已儲存'); renderDrawer(); }
+  loadStatusSync(x.id, st);
+  if (ok1 && ok2){ S.drawerDirty = false; toast('已儲存'); renderDrawer(); }
 }
 async function deleteReq(id){
   if (writeBlocked()) return;
   try {
-    await Promise.all(['requests','track','kpi','busy'].map(c => enqueue(c + '/' + id, () => S.db.doc(c + '/' + id).delete())));
+    await Promise.all(['requests','track','kpi','busy','load'].map(c => enqueue(c + '/' + id, () => S.db.doc(c + '/' + id).delete())));
     toast('已刪除'); closeDrawer();
   } catch(e){ handleWriteError(e); }
 }
@@ -1655,7 +1688,6 @@ function manualForm(x){
       <div class="field"><label for="m-delivered">完成日</label><input type="date" id="m-delivered" value="${esc(k.deliveredDate || '')}"></div>
     </div>
     <label class="check"><input type="checkbox" id="m-public" ${k.hidePublic ? '' : 'checked'}><span>在進度看板公開（只顯示名稱、類別、業務單位、日期與狀態）</span></label>
-    ${x ? loadFieldsHTML(x) : ''}
     ${kpiFieldsHTML(r, k, late)}
     <div class="dw-actions"><button type="submit" class="btn primary">儲存</button><span class="grow"></span>${x ? `<button type="button" class="btn danger ${S.armedDelete ? 'armed' : ''}" data-act="delete">${S.armedDelete ? '確定刪除？再按一次' : '刪除這筆紀錄'}</button>` : ''}</div>
   </form>`;
@@ -1675,8 +1707,8 @@ async function saveManual(ev){
     planner:v('m-planner'), briefDate:'', dueDate:v('m-due'), launchDate:'', createdAt:ps.createdAt || new Date().toISOString(), urgency:null, leadDays:null, offSchedule:false, rating:null, edits:0};
   const doc = {...prev, source:prev.source || 'manual', status:st, stage:v('m-stage'), deliveredDate:delivered, hidePublic:!$('#m-public')?.checked, snapshot, ...readKpiFields()};
   if (await writeManual(id, doc)){
-    const x2 = findRow(id); const lp = x2 && $('#l-days') ? readLoadFields(x2, st) : null; if (lp) await writeLoad(id, lp);
-    S.pendingAdj = []; S.drawerId = id; S.drawerMode = 'view'; S.drawerDirty = false; toast('已儲存'); renderDrawer(); renderCurrent(); }
+    loadStatusSync(id, st);
+    S.drawerId = id; S.drawerMode = 'view'; S.drawerDirty = false; toast('已儲存'); renderDrawer(); renderCurrent(); }
 }
 function hash5(str){ let h = 0x811c9dc5; for (const ch of str){ h ^= ch.codePointAt(0); h = Math.imul(h, 16777619) >>> 0; } return h.toString(36).toUpperCase().padStart(5, '0').slice(-5); }
 function parseLog(text, year){
@@ -1851,11 +1883,16 @@ const LOAD_BANDS = [
   {max:Infinity, zh:'過載', pct:92},
 ];
 const ADJ_REASONS = ['需求變更','修改次數增加','資料延遲','評估誤差','其他'];
+// 每單位建議工時（小時）：沒有學習值、也沒有在量能設定改過時使用
+const SUGGEST_DEFAULT = {web:12, webupd:1, ads:1.5, kv:16, resize:0.5, motion:4, flow:4, tool:24, retouch:0.5, print:4, slides:6, internal:4, other:2};
+const PROGRESS_STEPS = [0, 25, 50, 75, 90, 100];
+const QUICK_EST = [['半天', 4], ['1 天', 8], ['2 天', 16], ['3 天', 24], ['5 天', 40]];
+const AVAIL_LINE = 0.85;
 const bandOf = ratio => LOAD_BANDS.find(b => ratio < b.max) || LOAD_BANDS[LOAD_BANDS.length - 1];
 const bandStyle = b => `background:color-mix(in srgb, var(--st-crit) ${b.pct}%, var(--surface));color:${b.pct >= 66 ? '#fff' : 'var(--ink)'}`;
-const estTotal = L => Math.max(0, num(L && L.estHours) + ((L && L.adjustments) || []).reduce((a, x) => a + num(x.delta), 0));
-const hrs = n => (Math.round(n * 10) / 10).toString();
-const fmtEst = h => { h = num(h); if (!h) return '—'; const d = Math.floor(h / 8), r = r1(h - d * 8); return [d ? d + ' 天' : '', r ? r + ' 小時' : ''].filter(Boolean).join(' ') + `（${hrs(h)}h）`; };
+const hrs = n => (Math.round(num(n) * 10) / 10).toString();
+const fmtDays = h => { h = num(h); if (!h) return '—'; return h >= 8 ? `${r1(h / 8)} 天` : `${hrs(h)} 小時`; };
+const fmtEst = h => { h = num(h); if (!h) return '—'; return `${fmtDays(h)}（${hrs(h)}h）`; };
 const monOf = d => addDays(day0(d), -((d.getDay() + 6) % 7));
 const leaveHours = ds => ((S.loadconf && S.loadconf.leaves) || []).filter(l => l.date === ds).reduce((a, l) => a + num(l.hours), 0);
 function dayCap(d){
@@ -1863,90 +1900,280 @@ function dayCap(d){
   const wd = [0,1,2,3,4].map(i => addDays(monOf(d), i)).filter(isWorkday).length || 1;
   return Math.max(0, 8 - num(S.loadconf.meetingHours, 4) / wd - leaveHours(fmtD(d)));
 }
-function loadJobs(){
-  const t = today0(), mon = monOf(t), fri = addDays(mon, 4);
-  const jobs = [], unscheduled = [], paused = [];
-  for (const [id, L] of S.load){
-    const req = S.requests.get(id), tr = S.track.get(id), kp = S.kpi.get(id), bz = S.busy.get(id);
-    const title = (req && req.title) || (kp && kp.snapshot && kp.snapshot.title) || (bz && bz.title) || L.title || '';
-    const no = (req && req.no) || (kp && kp.snapshot && kp.snapshot.no) || (bz && bz.no) || L.no || id;
-    const due = (req && req.dueDate) || (kp && kp.snapshot && kp.snapshot.dueDate) || (bz && bz.dueDate) || L.dueDate || '';
-    const status = req ? statusOf(req, tr || {}) : kp ? (kp.status || 'Open') : bz ? bz.status : (L.status || 'Open');
-    if (!isActive(status)) continue;
-    const total = estTotal(L); if (!total) continue;
-    const base = {id, no, title, due, status, total, L};
-    if (status === 'Postponed'){ paused.push(base); continue; }
-    const dueD = parseD(due); if (!dueD){ unscheduled.push(base); continue; }
-    let start = parseD(L.startDate) || parseD(req && req.briefDate) || (req && req.createdAt ? day0(new Date(req.createdAt)) : null) || t;
-    if (start > dueD) start = dueD;
-    const days = []; for (let d = new Date(start), g = 0; d <= dueD && g < 800; d = addDays(d, 1), g++) if (isWorkday(d)) days.push(fmtD(d));
-    if (!days.length) days.push(fmtD(dueD));
-    const per = total / days.length; const map = {};
-    days.forEach(ds => { map[ds] = per; });
-    if (dueD < t){ for (let d = new Date(t); d <= fri; d = addDays(d, 1)) if (isWorkday(d)) map[fmtD(d)] = per; }
-    for (const [wk, h] of Object.entries(L.overrides || {})){
-      const wm = parseD(wk); if (!wm || h === '' || h == null) continue;
-      const wdays = [0,1,2,3,4].map(i => addDays(wm, i)).filter(isWorkday).map(fmtD);
-      wdays.forEach(ds => { delete map[ds]; }); wdays.forEach(ds => { map[ds] = num(h) / (wdays.length || 1); });
-    }
-    jobs.push({...base, map, overdue:dueD < t});
+const workdaysIn = (a, b) => { const out = []; for (let d = new Date(a), g = 0; d <= b && g < 900; d = addDays(d, 1), g++) if (isWorkday(d)) out.push(fmtD(d)); return out; };
+function nextWorkday(d){ let x = new Date(d); for (let g = 0; g < 30 && !isWorkday(x); g++) x = addDays(x, 1); return x; }
+// 舊資料相容：startDate → window.start、overrides → alloc
+function normLoad(L){
+  L = L || {}; const w = L.window || {};
+  return {...L, window:{start:w.start || L.startDate || '', end:w.end || ''}, alloc:{...(L.overrides || {}), ...(L.alloc || {})}, adjustments:Array.isArray(L.adjustments) ? L.adjustments : []};
+}
+const adjSum = L => ((L && L.adjustments) || []).reduce((a, x) => a + num(x.delta), 0);
+const isConfirmed = L => num(L && L.estHours) > 0;
+function effTotal(L){ L = normLoad(L); return Math.max(0, (isConfirmed(L) ? num(L.estHours) : num(L.suggestHours)) + adjSum(L)); }
+const estTotal = effTotal;
+function availLabel(h){ if (h < 0.5) return '無法再承接'; if (h < 4) return '約半天以內'; if (h < 8) return '約半天～1 天'; if (h < 16) return '約 1～2 天'; if (h < 24) return '約 2～3 天'; return '3 天以上'; }
+
+/* 時數預抓：同類別 ≥3 件已確認評估的中位數 → 量能設定的建議工時表 → 預設表 */
+function learnedUnits(rm){
+  const by = {};
+  for (const [id, L0] of S.load){
+    const L = normLoad(L0); if (!isConfirmed(L)) continue;
+    const x = rm.get(id); const cat = (x && x.r.category) || L.category; if (!cat) continue;
+    (by[cat] = by[cat] || []).push(effTotal(L) / Math.max(1, num(x ? x.r.qty : 1, 1)));
   }
-  return {jobs, unscheduled, paused};
+  const out = {};
+  for (const [cat, arr] of Object.entries(by)){
+    if (arr.length < 3) continue;
+    arr.sort((a, b) => a - b); const m = arr.length;
+    out[cat] = {h:m % 2 ? arr[(m - 1) / 2] : (arr[m / 2 - 1] + arr[m / 2]) / 2, n:m};
+  }
+  return out;
 }
-function capWeeks(){
-  const t = today0(); const m0 = monOf(t);
-  const {jobs, unscheduled, paused} = loadJobs();
-  const weeks = [m0, addDays(m0, 7)].map(mon => {
-    const days = [0,1,2,3,4].map(i => { const d = addDays(mon, i), ds = fmtD(d); const cap = dayCap(d); const load = jobs.reduce((a, j) => a + (j.map[ds] || 0), 0); return {d, ds, cap, load, holiday:!isWorkday(d), leave:leaveHours(ds)}; });
-    const cap = days.reduce((a, x) => a + x.cap, 0), load = days.reduce((a, x) => a + x.load, 0);
-    const perJob = jobs.map(j => ({j, h:days.reduce((a, x) => a + (j.map[x.ds] || 0), 0)})).filter(x => x.h > 0.01);
-    return {mon, days, cap, load, ratio: cap ? load / cap : (load ? 9 : 0), perJob};
+function unitHours(cat, learned){
+  const zh = CAT[cat]?.zh || '';
+  if (learned && learned[cat]) return {h:learned[cat].h, basis:`依過去 ${learned[cat].n} 件「${zh}」的評估`};
+  const tb = (S.loadconf && S.loadconf.suggest) || {};
+  if (tb[cat] !== undefined && tb[cat] !== '' && num(tb[cat]) > 0) return {h:num(tb[cat]), basis:'依建議工時表'};
+  return {h:SUGGEST_DEFAULT[cat] ?? 2, basis:'依預設工時表'};
+}
+function suggestFor(x, learned){
+  const cat = x.r.category || 'other'; const qty = Math.max(1, num(x.r.qty, 1)); const unit = CAT[cat]?.unit || '件';
+  const u = unitHours(cat, learned);
+  const diff = num(S.kpiconf.difficulty?.[(x.k && x.k.difficulty) || 'normal'], 1);
+  const hours = Math.max(1, Math.round(u.h * qty * diff * 2) / 2);
+  return {hours, basis:`${u.basis}：每${unit} ${hrs(u.h)}h × ${qty} ${unit}${diff !== 1 ? ` × 難度 ${diff}` : ''}`};
+}
+// 只在設計本人的頁面執行：把未確認案件的建議值寫進 load，主管端讀到的數字才一致
+let _sugBusy = false;
+async function syncSuggestions(){
+  if (!S.isOwner || S.demo || !S.db || _sugBusy) return;
+  if (!S.loaded.load || !S.loaded.requests || !S.loaded.track || !S.loaded.kpi) return;
+  _sugBusy = true;
+  try {
+    const rm = capRows(); const learned = learnedUnits(rm);
+    for (const x of rm.values()){
+      if (!isActive(x.status)) continue;
+      const L = S.load.get(x.id);
+      if (L && isConfirmed(normLoad(L))) continue;
+      const s = suggestFor(x, learned);
+      if (L && num(L.suggestHours) === s.hours && L.suggestBasis === s.basis) continue;
+      if (!(await writeLoad(x.id, {suggestHours:s.hours, suggestBasis:s.basis}))) break;
+    }
+  } finally { _sugBusy = false; }
+}
+function scheduleSuggestSync(){ clearTimeout(scheduleSuggestSync._t); scheduleSuggestSync._t = setTimeout(syncSuggestions, 1500); }
+
+/* 負載計算 */
+function capRows(){ return new Map(allRows(true).filter(x => !x.gone).map(x => [x.id, x])); }
+function jobInfo(id, rm){
+  const x = rm.get(id) || null; const L = normLoad(S.load.get(id)); const bz = S.busy.get(id);
+  return {
+    id, x, L,
+    title:(x && x.r.title) || (bz && bz.title) || L.title || '',
+    no:(x && x.r.no) || (bz && bz.no) || L.no || id,
+    due:(x && x.r.dueDate) || (bz && bz.dueDate) || L.dueDate || '',
+    status:x ? x.status : bz ? (STATUS[bz.status] ? bz.status : 'On going') : (L.status || 'Open'),
+    brief:(x && x.r.briefDate) || '', created:(x && x.r.createdAt) || '',
+  };
+}
+// 剩餘工時從今天起分攤到期間內的工作天；鎖定週固定時數，其餘工時排到其他天（總量守恆）
+function allocate(j, t){
+  const L = j.L, tds = fmtD(t);
+  const dueD = parseD(L.window.end) || parseD(j.due);
+  if (!dueD) return null;
+  let startD = parseD(L.window.start) || parseD(j.brief) || (j.created ? day0(new Date(j.created)) : null) || t;
+  if (startD > dueD) startD = dueD;
+  const winDays = workdaysIn(startD, dueD); if (!winDays.length) winDays.push(fmtD(dueD));
+  const futureWin = winDays.filter(ds => ds >= tds);
+  const overdue = !futureWin.length;
+  let days = futureWin;
+  if (overdue){ days = workdaysIn(t, addDays(monOf(t), 4)); if (!days.length) days = [fmtD(nextWorkday(t))]; }
+  const rAt = parseD(L.remainingAt);
+  const reported = !!rAt && L.remaining !== undefined && L.remaining !== null && L.remaining !== '';
+  let remNow;
+  if (reported){
+    const later = L.adjustments.filter(a => L.remainingTs ? String(a.at || '') > L.remainingTs : String(a.at || '').slice(0, 10) > L.remainingAt).reduce((s, a) => s + num(a.delta), 0);
+    const base = Math.max(0, num(L.remaining) + later);
+    if (overdue) remNow = base;
+    else { const span = workdaysIn(rAt > startD ? rAt : startD, dueD); const past = span.filter(ds => ds < tds).length; remNow = span.length ? base * (1 - past / span.length) : base; }
+  } else if (overdue){
+    remNow = Math.min(j.total, j.total / winDays.length * days.length);
+  } else {
+    const past = winDays.filter(ds => ds < tds).length; remNow = j.total * (1 - past / winDays.length);
+  }
+  const map = {}; let locked = 0; const lockedDays = new Set();
+  for (const [wk, h] of Object.entries(L.alloc || {})){
+    if (h === '' || h === null || h === undefined) continue;
+    const wm = parseD(wk); if (!wm) continue;
+    const wdays = [0,1,2,3,4].map(i => fmtD(addDays(wm, i))).filter(ds => days.includes(ds));
+    if (!wdays.length) continue;
+    wdays.forEach(ds => { map[ds] = num(h) / wdays.length; lockedDays.add(ds); });
+    locked += num(h);
+  }
+  const free = days.filter(ds => !lockedDays.has(ds));
+  const rest = remNow - locked; let unplaced = 0;
+  if (rest > 0.01){
+    if (free.length) free.forEach(ds => { map[ds] = (map[ds] || 0) + rest / free.length; });
+    else { const last = days[days.length - 1]; map[last] = (map[last] || 0) + rest; unplaced = rest; }
+  }
+  return {map, remNow, start:fmtD(startD), end:fmtD(dueD), overdue, lockOver:rest < -0.01, unplaced, reported};
+}
+function capData(override){
+  const t = today0(), tds = fmtD(t);
+  let m0 = monOf(t);
+  if (!workdaysIn(t, addDays(m0, 4)).length) m0 = addDays(m0, 7);
+  const shifted = fmtD(m0) !== fmtD(monOf(t));
+  const rm = capRows();
+  const learned = S.isOwner ? learnedUnits(rm) : {};
+  const ids = new Set(S.load.keys());
+  if (S.isOwner) for (const x of rm.values()) if (isActive(x.status)) ids.add(x.id);
+  if (override) ids.add(override.id);
+  const jobs = [], unscheduled = [], paused = [];
+  for (const id of ids){
+    const j = jobInfo(id, rm);
+    if (override && override.id === id) j.L = normLoad({...(S.load.get(id) || {}), ...override.patch});
+    if (!isActive(j.status)) continue;
+    j.confirmed = isConfirmed(j.L);
+    if (j.confirmed || num(j.L.suggestHours) > 0) j.total = effTotal(j.L);
+    else if (S.isOwner && j.x){ const s = suggestFor(j.x, learned); j.liveSuggest = s; j.total = Math.max(0, s.hours + adjSum(j.L)); }
+    else continue;
+    if (j.status === 'Postponed'){ paused.push(j); continue; }
+    const a = allocate(j, t); if (!a){ unscheduled.push(j); continue; }
+    jobs.push(Object.assign(j, a));
+  }
+  const weeks = [m0, addDays(m0, 7)].map((mon, wi) => {
+    const days = [0,1,2,3,4].map(i => {
+      const d = addDays(mon, i), ds = fmtD(d), past = ds < tds, hol = !isWorkday(d);
+      const cap = past || hol ? 0 : dayCap(d);
+      const load = past ? 0 : jobs.reduce((s, j) => s + (j.map[ds] || 0), 0);
+      return {d, ds, past, holiday:hol, cap, load, leave:leaveHours(ds)};
+    });
+    const cap = days.reduce((s, x) => s + x.cap, 0), load = days.reduce((s, x) => s + x.load, 0);
+    const perJob = jobs.map(j => ({j, h:days.reduce((s, x) => s + (j.map[x.ds] || 0), 0)})).filter(p => p.h > 0.01);
+    const ratio = cap ? load / cap : (load ? 9 : 0);
+    const label = wi === 0 ? (shifted ? '下週' : '本週剩餘') : (shifted ? '下下週' : '下週');
+    return {mon, days, cap, load, ratio, band:bandOf(ratio), avail:Math.max(0, cap * AVAIL_LINE - load), perJob, label, openDays:days.filter(x => x.cap > 0).length};
   });
-  return {weeks, jobs, unscheduled, paused};
+  return {weeks, jobs, unscheduled, paused, learned, rm};
 }
+const allJobs = C => [...C.jobs, ...C.paused, ...C.unscheduled];
+const weekHours = (j, w) => j && j.map ? w.days.reduce((s, d) => s + (j.map[d.ds] || 0), 0) : 0;
+function capAttention(C){
+  const out = [];
+  C.jobs.filter(j => j.overdue).forEach(j => out.push({id:j.id, t:`「${j.title}」已過完稿日（${showD(j.due)}）仍未完成`, a:'回報剩餘工時，或調整完稿日'}));
+  C.jobs.filter(j => j.lockOver).forEach(j => out.push({id:j.id, t:`「${j.title}」鎖定的時數超過剩餘工時`, a:'調低鎖定時數'}));
+  C.jobs.filter(j => j.unplaced > 0.01).forEach(j => out.push({id:j.id, t:`「${j.title}」鎖定後還有 ${hrs(j.unplaced)}h 排不進去`, a:'調整鎖定或延後完稿日'}));
+  const over = C.weeks.flatMap(w => w.days).filter(d => d.cap > 0 && d.load / d.cap > 1.0001);
+  if (over.length) out.push({t:`${over.length} 天的已排時數超過可用時數（${over.slice(0, 4).map(d => showD(d.d)).join('、')}${over.length > 4 ? '…' : ''}）`, a:'鎖定時數或與企劃協調完稿日'});
+  const sug = allJobs(C).filter(j => !j.confirmed).length;
+  if (sug) out.push({triage:true, t:`${sug} 件使用系統預估時數，尚未確認`, a:'逐件確認'});
+  return out;
+}
+function recentChanges(C){
+  const since = fmtD(addDays(today0(), -14)); const out = [];
+  for (const [id, L0] of S.load){
+    for (const a of normLoad(L0).adjustments){
+      const d = String(a.at || '').slice(0, 10); if (d < since) continue;
+      out.push({at:a.at, title:jobInfo(id, C.rm).title, reason:a.reason || '其他', delta:num(a.delta)});
+    }
+  }
+  return out.sort((a, b) => String(b.at).localeCompare(String(a.at))).slice(0, 10);
+}
+function bandChip(b){ return `<span class="bchip" style="${bandStyle(b)}">${b.zh}</span>`; }
 function renderCapacity(){
   const sec = $('#v-capacity'); const owner = S.isOwner;
-  const ae = document.activeElement; if (ae && sec.contains(ae) && /INPUT|SELECT/.test(ae.tagName)) return;
-  const C = capWeeks();
-  const last = [...S.load.values()].map(L => L.updatedAt || '').concat([S.loadconf.updatedAt || '']).sort().pop();
-  const wkLabel = w => `${showD(w.mon)} – ${showD(addDays(w.mon, 4))}`;
-  const big = (w, name) => { const b = bandOf(w.ratio); return `<div class="capcell" style="${bandStyle(b)}"><span class="cap-k">${name}</span><b>${b.zh}</b><span class="cap-d">${esc(wkLabel(w))}</span>${owner ? `<span class="cap-h">已排 ${hrs(w.load)}h ／ 可用 ${hrs(w.cap)}h</span>` : ''}</div>`; };
-  const strip = C.weeks.map((w, wi) => `<div class="strip-w"><span class="cap-k">${wi ? '下週' : '本週'}</span><div class="strip-d">${w.days.map(x => { if (x.holiday) return `<div class="dcell off"><span>${WK[x.d.getDay()]} ${x.d.getMonth()+1}/${x.d.getDate()}</span><b>假日</b></div>`; const b = bandOf(x.cap ? x.load / x.cap : (x.load ? 9 : 0)); return `<div class="dcell" style="${bandStyle(b)}" title="${owner ? `${hrs(x.load)}h / ${hrs(x.cap)}h` : b.zh}"><span>${WK[x.d.getDay()]} ${x.d.getMonth()+1}/${x.d.getDate()}</span><b>${x.cap ? b.zh : '請假'}</b>${x.leave ? `<small>請假 ${hrs(x.leave)}h</small>` : ''}</div>`; }).join('')}</div></div>`).join('');
-  const ids = [...new Set(C.weeks.flatMap(w => w.perJob.map(x => x.j.id)))];
-  const jobRows = ids.map(id => C.jobs.find(j => j.id === id)).sort((a, b) => (a.due || '').localeCompare(b.due || '')).map(j => {
-    const cells = C.weeks.map(w => { const pj = w.perJob.find(x => x.j.id === j.id); const h = pj ? pj.h : 0; const wk = fmtD(w.mon); const ov = (j.L.overrides || {})[wk];
-      if (owner) return `<td class="n"><input type="number" min="0" step="0.5" class="cap-ov" data-cap-ov="${esc(j.id)}" data-wk="${wk}" value="${ov ?? ''}" placeholder="${hrs(h)}" aria-label="${esc(j.title)} ${wk} 時數"></td>`;
-      const share = w.cap ? Math.min(1, h / w.cap) : 0; return `<td><span class="sharebar" aria-label="佔用比例"><i style="width:${(share * 100).toFixed(0)}%"></i></span></td>`; }).join('');
-    return `<tr><td><b>${esc(j.title)}</b><div class="mono muted" style="font-size:11px">${esc(j.no)}</div></td><td style="white-space:nowrap">${esc(showD(j.due))}${j.overdue ? ' <span class="tag warn">逾期</span>' : ''}</td><td>${statusPill(j.status)}</td>${owner ? `<td class="n">${hrs(j.total)}h</td>` : ''}${cells}</tr>`;
-  }).join('');
-  const missing = owner ? allRows(true).filter(x => !x.gone && isActive(x.status) && x.status !== 'Postponed' && !estTotal(S.load.get(x.id))) : [];
+  const ae = document.activeElement; if (ae && sec.contains(ae) && /INPUT|SELECT|TEXTAREA/.test(ae.tagName)) return;
+  const C = capData(); const t = today0();
+  const all = allJobs(C); const sugN = all.filter(j => !j.confirmed).length;
+  const conf = S.loadconf.confirmedAt; const confThisWeek = !!conf && fmtD(monOf(new Date(conf))) === fmtD(monOf(t));
+  const big = w => `<div class="capcell" style="${bandStyle(w.band)}"><span class="cap-k">${w.label}${w.label === '本週剩餘' ? `・${w.openDays} 個工作天` : ''}</span><b>${w.band.zh}</b><span class="cap-d">${esc(showD(w.mon))} – ${esc(showD(addDays(w.mon, 4)))}</span>${owner ? `<span class="cap-h">已排 ${hrs(w.load)}h ／ 可用 ${hrs(w.cap)}h</span>` : ''}<span class="cap-av">可承接：${availLabel(w.avail)}</span></div>`;
+  const dayCell = x => {
+    const lab = `${WK[x.d.getDay()]} ${x.d.getMonth() + 1}/${x.d.getDate()}`;
+    if (x.past) return `<div class="dcell off past"><span>${lab}</span><b>已過</b></div>`;
+    if (x.holiday) return `<div class="dcell off"><span>${lab}</span><b>假日</b></div>`;
+    if (!x.cap) return `<div class="dcell off"><span>${lab}</span><b>請假</b></div>`;
+    const b = bandOf(x.load / x.cap);
+    return `<button type="button" class="dcell ${S.capDay === x.ds ? 'sel' : ''}" style="${bandStyle(b)}" data-act="cap-day" data-ds="${x.ds}" aria-pressed="${S.capDay === x.ds}"><span>${lab}</span><b>${b.zh}</b>${x.leave ? `<small>${owner ? `請假 ${hrs(x.leave)}h` : '部分請假'}</small>` : ''}</button>`;
+  };
+  const strip = C.weeks.map(w => `<div class="strip-w"><span class="cap-k">${w.label}</span><div class="strip-d">${w.days.map(dayCell).join('')}</div></div>`).join('');
+  let dayDetail = '';
+  const dd = S.capDay && C.weeks.flatMap(w => w.days).find(x => x.ds === S.capDay && x.cap > 0);
+  if (dd){
+    const items = C.jobs.map(j => ({j, h:j.map[dd.ds] || 0})).filter(p => p.h > 0.01).sort((a, b) => b.h - a.h);
+    dayDetail = `<div class="daydetail"><div><b>${esc(showD(dd.d))}</b>${owner ? `　已排 ${hrs(dd.load)}h ／ 可用 ${hrs(dd.cap)}h` : `　${bandOf(dd.load / dd.cap).zh}`}</div><ul class="plain">${items.map(p => `<li>${esc(p.j.title)}${owner ? ` <span class="muted">${hrs(p.h)}h</span>` : ''}</li>`).join('') || '<li class="muted">這天沒有排入工作</li>'}</ul></div>`;
+  }
   const legend = LOAD_BANDS.map(b => `<span class="lg"><i style="${bandStyle(b)}"></i>${b.zh}</span>`).join('');
+  const wk0 = fmtD(C.weeks[0].mon), wk1 = fmtD(C.weeks[1].mon);
+  const ids = [...new Set(C.weeks.flatMap(w => w.perJob.map(p => p.j.id)))];
+  const mgrRows = ids.map(id => C.jobs.find(j => j.id === id)).sort((a, b) => (a.due || '').localeCompare(b.due || '')).map(j => {
+    const cells = C.weeks.map(w => { const h = weekHours(j, w); const share = w.cap ? Math.min(1, h / w.cap) : 0; return `<td><span class="sharebar" aria-label="佔用比例"><i style="width:${(share * 100).toFixed(0)}%"></i></span></td>`; }).join('');
+    return `<tr><td><b>${esc(j.title)}</b>${j.confirmed ? '' : ' <span class="tag est">系統預估</span>'}<div class="mono muted" style="font-size:11px">${esc(j.no)}</div></td><td style="white-space:nowrap">${esc(showD(j.due))}${j.overdue ? ' <span class="tag warn">逾期</span>' : ''}</td><td>${statusPill(j.status)}</td>${cells}</tr>`;
+  }).join('');
+  const ckRows = [...C.jobs, ...C.unscheduled].sort((a, b) => String(a.due || '9').localeCompare(String(b.due || '9'))).map(j => {
+    const sched = !!j.map;
+    const lockIn = (wk, w) => sched ? `<input type="number" min="0" step="0.5" class="cap-ov" data-cap-lock="${esc(j.id)}" data-week="${wk}" value="${j.L.alloc[wk] ?? ''}" placeholder="${hrs(weekHours(j, w))}" aria-label="${esc(j.title)} ${w.label}投入時數">` : '<span class="muted">—</span>';
+    return `<tr>
+      <td><button type="button" class="linkbtn" data-act="cap-open" data-id="${esc(j.id)}" style="text-align:left">${esc(j.title)}</button>${j.confirmed ? '' : ' <span class="tag est">系統預估</span>'}${j.overdue ? ' <span class="tag warn">逾期</span>' : ''}<div class="mono muted" style="font-size:11px">${esc(j.no)}</div></td>
+      <td style="white-space:nowrap">${sched ? esc(showD(j.due)) : '<span class="muted">未排程</span>'}</td>
+      <td class="n">${esc(fmtDays(j.total))}<div class="muted" style="font-size:11px">${hrs(j.total)}h</div></td>
+      <td><div class="pchips">${PROGRESS_STEPS.map(p => `<button type="button" class="pchip ${j.L.progress === p ? 'on' : ''}" data-act="cap-prog" data-id="${esc(j.id)}" data-p="${p}">${p}%</button>`).join('')}</div></td>
+      <td class="n"><input type="number" min="0" step="0.5" class="cap-ov" data-cap-rem="${esc(j.id)}" placeholder="${hrs(sched ? j.remNow : j.total)}" aria-label="${esc(j.title)} 剩餘工時"></td>
+      <td class="n">${lockIn(wk0, C.weeks[0])}</td>
+      <td class="n">${lockIn(wk1, C.weeks[1])}</td></tr>`;
+  }).join('');
+  const att = owner ? capAttention(C) : [];
+  const ch = recentChanges(C);
+  const leaves = (S.loadconf.leaves || []).filter(l => l.date >= fmtD(addDays(t, -14))).sort((a, b) => a.date.localeCompare(b.date));
+  const tb = S.loadconf.suggest || {};
+  const remind = owner && !confThisWeek && (t.getDay() >= 4 || t.getDay() === 0 || !conf);
   sec.innerHTML = `
-    <div class="page-head"><div><h2>量能</h2><p class="sub">本週與下週的設計負載，以區間粗估是否過載。可用時數 = 工作天 × 8 小時，扣除國定假日、每週例行會議 ${hrs(num(S.loadconf.meetingHours, 4))} 小時與請假。${last ? `最後更新：${esc(showDT(last))}` : ''}</p></div>
-      ${owner ? '<span class="tag">主管只看得到區間，看不到時數</span>' : ''}</div>
-    <div class="capgrid">${big(C.weeks[0], '本週')}${big(C.weeks[1], '下週')}</div>
-    <div class="card"><h3 style="font-size:15px;margin-bottom:10px">逐日負載</h3><div class="strip2">${strip}</div><div class="legend">${legend}</div></div>
-    <div style="display:grid;gap:10px"><h3 style="font-size:15px">這兩週的工作 <span class="muted" style="font-size:12px;font-weight:500">${owner ? '時數依開始日到完稿日平均分攤；需要時可直接改某週時數，清空恢復自動' : '條狀為佔該週可用時間的比例'}</span></h3>
-      <div class="tablewrap"><table style="min-width:640px"><thead><tr><th>工作</th><th>完稿日</th><th>狀態</th>${owner ? '<th class="n">總工時</th>' : ''}<th${owner ? ' class="n"' : ''}>本週</th><th${owner ? ' class="n"' : ''}>下週</th></tr></thead><tbody>${jobRows || `<tr><td colspan="6"><div class="empty"><b>這兩週沒有排入的工作</b>${owner ? '<span>在工作台案件裡填「預估時程」後，就會出現在這裡。</span>' : ''}</div></td></tr>`}</tbody></table></div></div>
-    ${C.paused.length || C.unscheduled.length ? `<div class="twocol">
-      ${C.paused.length ? `<div class="card"><h3 style="font-size:15px">暫停計入（延後）</h3><ul class="plain">${C.paused.map(j => `<li>${esc(j.title)}</li>`).join('')}</ul></div>` : '<div></div>'}
-      ${C.unscheduled.length ? `<div class="card"><h3 style="font-size:15px">未排程（沒有完稿日）</h3><ul class="plain">${C.unscheduled.map(j => `<li>${esc(j.title)}${owner ? ` <span class="muted">${hrs(j.total)}h</span>` : ''}</li>`).join('')}</ul></div>` : ''}</div>` : ''}
+    <div class="page-head"><div><h2>量能</h2><p class="sub">「本週剩餘」只算今天到週五。可用時數 = 工作天 × 8 小時，扣除國定假日、每週例行會議 ${hrs(num(S.loadconf.meetingHours, 4))} 小時與請假；可承接以可用時數的 85% 為上限換算。</p></div>
+      ${owner ? '<span class="tag">主管只看得到區間與可承接範圍，看不到時數</span>' : ''}</div>
+    ${remind ? `<div class="notice info"><b>本週還沒確認量能</b><span>花一分鐘在下方「本週更新」回報進度，再按「確認本週量能」，主管會看到確認時間。</span></div>` : ''}
+    <div class="capmeta"><span>${conf ? `設計最後確認：${esc(showDT(conf))}` : '設計尚未確認量能'}</span><span>${all.length} 件計入量能${sugN ? `，其中 ${sugN} 件為系統預估` : ''}</span>${owner && sugN ? '<button class="btn sm" data-act="triage-open">逐件確認時數</button>' : ''}</div>
+    <div class="capgrid">${C.weeks.map(big).join('')}</div>
+    <div class="card"><h3 style="font-size:15px;margin-bottom:10px">逐日負載 <span class="muted" style="font-size:12px;font-weight:500">點一天看當天排入的工作</span></h3><div class="strip2">${strip}</div>${dayDetail}<div class="legend">${legend}</div></div>
+    ${att.length ? `<div class="card attn"><h3 style="font-size:15px">需要注意</h3><ul class="plain">${att.map(x => `<li><span>${esc(x.t)}</span>${x.triage ? ` <button class="linkbtn" data-act="triage-open">${esc(x.a)}</button>` : x.id ? ` <button class="linkbtn" data-act="cap-open" data-id="${esc(x.id)}">${esc(x.a)}</button>` : ` <span class="muted">${esc(x.a)}</span>`}</li>`).join('')}</ul></div>` : ''}
     ${owner ? `
-    <div class="card"><h3 style="font-size:15px">尚未填預估時程（${missing.length} 件）</h3><p class="hint" style="margin:4px 0 10px">進行中的工作要填時程才會計入量能。填天數或小時（1 天 = 8 小時），填完按 Enter 或移開即儲存。</p>
-      ${missing.length ? `<div class="tablewrap" style="border:0"><table style="min-width:520px"><tbody>${missing.slice(0, 40).map(x => `<tr><td>${esc(x.r.title)}<div class="mono muted" style="font-size:11px">${esc(x.r.no || x.id)} · 完稿 ${esc(showD(x.r.dueDate))}</div></td><td style="white-space:nowrap"><input type="number" min="0" step="0.5" class="cap-ov" data-cap-est="${esc(x.id)}" data-unit="d" placeholder="天" aria-label="天"> 天 <input type="number" min="0" step="0.5" class="cap-ov" data-cap-est="${esc(x.id)}" data-unit="h" placeholder="小時" aria-label="小時"> 小時</td></tr>`).join('')}</tbody></table></div>` : '<p class="muted" style="font-size:13px">全部都填好了。</p>'}</div>
+    <div style="display:grid;gap:10px"><h3 style="font-size:15px">本週更新 <span class="muted" style="font-size:12px;font-weight:500">完成度或剩餘工時擇一回報，系統從今天起重新分攤；兩週欄位可鎖定投入時數，清空恢復自動，總工時不變</span></h3>
+      <div class="tablewrap"><table class="ck" style="min-width:920px"><thead><tr><th>工作</th><th>完稿日</th><th class="n">總工時</th><th>完成度</th><th class="n">剩餘（h）</th><th class="n">${esc(C.weeks[0].label)}（h）</th><th class="n">${esc(C.weeks[1].label)}（h）</th></tr></thead>
+      <tbody>${ckRows || '<tr><td colspan="7"><div class="empty"><b>目前沒有進行中的工作</b></div></td></tr>'}</tbody></table></div>
+      <div class="dw-actions"><button class="btn primary" data-act="cap-confirm">確認本週量能</button><span class="hint">${conf ? `上次確認：${esc(showDT(conf))}` : '尚未確認過'}。確認後，主管畫面會顯示確認時間。</span></div></div>`
+    : `
+    <div style="display:grid;gap:10px"><h3 style="font-size:15px">這兩週的工作 <span class="muted" style="font-size:12px;font-weight:500">條狀為佔該週可用時間的比例</span></h3>
+      <div class="tablewrap"><table style="min-width:640px"><thead><tr><th>工作</th><th>完稿日</th><th>狀態</th><th>${esc(C.weeks[0].label)}</th><th>${esc(C.weeks[1].label)}</th></tr></thead><tbody>${mgrRows || '<tr><td colspan="5"><div class="empty"><b>這兩週沒有排入的工作</b></div></td></tr>'}</tbody></table></div></div>`}
     <div class="twocol">
-      <div class="card"><h3 style="font-size:15px">請假登記</h3><p class="hint" style="margin:4px 0 10px">登記後當天可用時數自動扣除，主管只會看到該日「請假」。</p>
-        <div class="dw-actions"><input type="date" id="lv-date" style="width:auto"><select id="lv-hours" style="width:auto"><option value="8">整天 8h</option><option value="4">半天 4h</option><option value="2">2h</option><option value="1">1h</option></select><button class="btn sm" data-act="lv-add">新增</button></div>
-        <ul class="plain" style="margin-top:10px">${((S.loadconf.leaves || []).filter(l => l.date >= fmtD(addDays(today0(), -14))).sort((a, b) => a.date.localeCompare(b.date)).map(l => `<li>${esc(showD(l.date))} 請假 ${hrs(l.hours)}h <button class="linkbtn" data-act="lv-del" data-date="${esc(l.date)}" data-h="${esc(l.hours)}">刪除</button></li>`).join('')) || '<li class="muted">目前沒有登記</li>'}</ul></div>
-      <div class="card"><h3 style="font-size:15px">每週例行會議</h3><p class="hint" style="margin:4px 0 10px">每週固定扣除的時數，國定假日那週也照扣。</p>
-        <div class="dw-actions"><input type="number" id="lv-meet" min="0" step="0.5" value="${num(S.loadconf.meetingHours, 4)}" style="width:90px"> 小時／週 <button class="btn sm" data-act="lv-meet">儲存</button></div></div>
-    </div>` : ''}`;
+      <div class="card"><h3 style="font-size:15px">近兩週的變動</h3>${ch.length ? `<ul class="plain" style="margin-top:8px">${ch.map(c => `<li><b>${esc(c.title)}</b>：${esc(c.reason)}（${c.delta > 0 ? '增加' : '減少'}${owner ? ` ${c.delta > 0 ? '+' : ''}${hrs(c.delta)}h` : ''}）<span class="muted"> ${esc(showD(String(c.at).slice(0, 10)))}</span></li>`).join('')}</ul>` : '<p class="muted" style="font-size:13px;margin-top:8px">沒有工時變動。</p>'}</div>
+      ${C.paused.length || C.unscheduled.length ? `<div class="card"><h3 style="font-size:15px">沒有計入兩週量能的工作</h3><ul class="plain" style="margin-top:8px">${C.paused.map(j => `<li>${esc(j.title)} <span class="muted">延後中</span></li>`).join('')}${C.unscheduled.map(j => `<li>${esc(j.title)} <span class="muted">沒有完稿日</span></li>`).join('')}</ul></div>` : '<div></div>'}
+    </div>
+    ${owner ? `
+    <details class="card conf" id="cap-conf" ${S.capConfOpen ? 'open' : ''}><summary>量能設定：請假、例行會議、建議工時</summary>
+      <div class="twocol" style="margin-top:14px">
+        <div class="field"><span class="lbl">請假登記</span>
+          <div class="dw-actions"><input type="date" id="lv-date" style="width:auto" aria-label="開始日"><span class="muted">至</span><input type="date" id="lv-date2" style="width:auto" aria-label="結束日（選填）"><select id="lv-hours" style="width:auto" aria-label="每天時數"><option value="8">整天 8h</option><option value="4">半天 4h</option><option value="2">2h</option><option value="1">1h</option></select><button class="btn sm" data-act="lv-add">新增</button></div>
+          <span class="hint">結束日可留空（只請一天）；區間內的週末與國定假日會自動跳過。主管只會看到該日「請假」。</span>
+          <ul class="plain">${leaves.map(l => `<li>${esc(showD(l.date))} 請假 ${hrs(l.hours)}h <button class="linkbtn" data-act="lv-del" data-date="${esc(l.date)}" data-h="${esc(l.hours)}">刪除</button></li>`).join('') || '<li class="muted">目前沒有登記</li>'}</ul>
+        </div>
+        <div class="field"><span class="lbl">每週例行會議</span>
+          <div class="dw-actions"><input type="number" id="lv-meet" min="0" step="0.5" value="${num(S.loadconf.meetingHours, 4)}" style="width:90px" aria-label="每週會議時數"> 小時／週 <button class="btn sm" data-act="lv-meet">儲存</button></div>
+          <span class="hint">每週固定扣除，國定假日那週也照扣。</span>
+        </div>
+      </div>
+      <h4 style="font-size:13px;margin-top:18px;color:var(--ink-3)">建議工時表（每單位小時）</h4>
+      <p class="hint" style="margin-top:4px">新案件會用「建議工時 × 數量 × 難度」預抓時數。同類別累積 3 件以上已確認的評估後，會改用你的實際評估中位數（學習值）。</p>
+      <div class="conf-grid">${CATS.map(c => `<div class="field"><label for="sg-${c.k}">${esc(c.zh)}（每${esc(c.unit)}）</label><input type="number" id="sg-${c.k}" data-sg="${c.k}" min="0" step="0.5" value="${tb[c.k] ?? ''}" placeholder="${SUGGEST_DEFAULT[c.k] ?? 2}"><span class="hint">${C.learned[c.k] ? `學習值 ${hrs(C.learned[c.k].h)}h（${C.learned[c.k].n} 件，優先使用）` : '尚無學習值'}</span></div>`).join('')}</div>
+      <div class="dw-actions" style="margin-top:14px"><button class="btn primary sm" data-act="sg-save">儲存建議工時</button><button class="btn sm" data-act="sg-reset">恢復預設</button></div>
+    </details>` : ''}`;
 }
 async function writeLoad(id, patch){
   if (writeBlocked()) return false;
-  const x = findRow(id); const prev = S.load.get(id) || {};
+  if (!S.loaded.load){ toast('量能資料讀取中，請稍後再試'); return false; }
+  const x = findRow(id);
+  const prev = S.load.has(id) ? normLoad(S.load.get(id)) : {adjustments:[], alloc:{}, window:{start:'', end:''}};
   const snap = x ? {no:x.r.no || id, title:x.r.title || '', dueDate:x.r.dueDate || '', category:x.r.category || '', status:x.status} : {};
-  const doc = {adjustments:[], overrides:{}, ...prev, ...snap, ...patch, updatedAt:new Date().toISOString()};
+  const doc = {...prev, ...snap, ...patch, updatedAt:new Date().toISOString()};
+  delete doc.startDate; delete doc.overrides;
+  Object.keys(doc).forEach(k => { if (doc[k] === undefined) delete doc[k]; });
   S.load.set(id, doc);
   try { await enqueue('load/' + id, () => S.db.doc('load/' + id).set(doc)); return true; }
   catch(e){ handleWriteError(e); return false; }
@@ -1954,34 +2181,154 @@ async function writeLoad(id, patch){
 async function writeLoadConf(patch){
   if (writeBlocked()) return false;
   const doc = {meetingHours:4, leaves:[], ...S.loadconf, ...patch, updatedAt:new Date().toISOString()};
+  Object.keys(doc).forEach(k => { if (doc[k] === undefined) delete doc[k]; });
   S.loadconf = doc;
   try { await enqueue('loadconf/main', () => S.db.doc('loadconf/main').set(doc)); return true; }
   catch(e){ handleWriteError(e); return false; }
 }
-function loadFieldsHTML(x){
-  const L = (x && S.load.get(x.id)) || {}; const base = num(L.estHours); const d = Math.floor(base / 8), h = r1(base - d * 8);
-  const adj = [...(L.adjustments || []), ...(S.pendingAdj || [])];
-  return `<div class="private dw-sec">
-    <h4>預估時程（量能） <span class="tag">主管只看得到區間</span></h4>
-    <div class="row2">
-      <div class="field"><span class="lbl">初估時程</span><div class="qty"><input type="number" id="l-days" min="0" step="0.5" value="${base ? d : ''}" placeholder="0" style="width:80px"> 天 <input type="number" id="l-hours" min="0" step="0.5" value="${base && h ? h : ''}" placeholder="0" style="width:80px"> 小時</div><span class="hint">1 天 = 8 小時。</span></div>
-      <div class="field"><label for="l-start">開始日</label><input type="date" id="l-start" value="${esc(L.startDate || '')}"><span class="hint">留空時用資料提供日；改成「進行中」時自動填今天。</span></div>
-    </div>
-    <div class="field"><span class="lbl">調整紀錄</span>
-      ${adj.length ? `<ul class="plain">${adj.map(a => `<li><b>${num(a.delta) > 0 ? '+' : ''}${hrs(num(a.delta))}h</b> ${esc(a.reason)} <span class="muted">${esc(showDT(a.at))}</span></li>`).join('')}</ul>` : '<span class="hint">尚無調整</span>'}
-      <div class="dw-actions"><input type="number" id="l-adj" step="0.5" placeholder="+4 或 -2" style="width:110px"> 小時 <select id="l-adj-reason" style="width:auto">${ADJ_REASONS.map(r => `<option>${r}</option>`).join('')}</select><button type="button" class="btn sm" data-act="l-adj-add">加入調整</button></div>
-      <span class="hint">目前總工時：<b class="js-ltotal">${fmtEst(estTotal({estHours:base, adjustments:adj}))}</b>　調整會在按「儲存」後生效。</span>
-    </div>
+function loadStatusSync(id, st){
+  if (!S.load.has(id)) return;
+  const W = normLoad(S.load.get(id)).window;
+  writeLoad(id, st === 'On going' && !W.start ? {window:{...W, start:fmtD(today0())}} : {});
+}
+function jobTotalNow(id){ const C = capData(); const j = allJobs(C).find(o => o.id === id); return j ? j.total : effTotal(S.load.get(id)); }
+async function setProgress(id, p){
+  const total = jobTotalNow(id);
+  if (await writeLoad(id, {progress:p, remaining:r1(total * (1 - p / 100)), remainingAt:fmtD(today0()), remainingTs:new Date().toISOString()})) toast(p === 100 ? '已回報 100%，記得把狀態改為「完成」' : `已回報完成度 ${p}%`);
+}
+async function setRemaining(id, rem){
+  const total = jobTotalNow(id); rem = Math.max(0, rem);
+  if (await writeLoad(id, {remaining:r1(rem), remainingAt:fmtD(today0()), remainingTs:new Date().toISOString(), progress:total ? Math.max(0, Math.min(100, Math.round((1 - rem / total) * 100))) : null})) toast('已更新剩餘工時');
+}
+
+/* 案件抽屜：時程卡（獨立儲存，不影響進度與 KPI 表單） */
+function loadCardHTML(x){
+  const C = capData(); const j = allJobs(C).find(o => o.id === x.id);
+  const L = normLoad(S.load.get(x.id)); const conf = isConfirmed(L); const active = isActive(x.status);
+  const w0 = C.weeks[0], w1 = C.weeks[1];
+  const sug = j && j.liveSuggest ? j.liveSuggest : (num(L.suggestHours) > 0 ? {hours:num(L.suggestHours), basis:L.suggestBasis || ''} : suggestFor(x, C.learned));
+  const total = j ? j.total : effTotal(L);
+  const head = `<h4>時程與量能 ${conf ? '<span class="tag">已確認</span>' : '<span class="tag est">系統預估</span>'} <span class="tag">主管只看得到區間</span></h4>`;
+  const adjList = L.adjustments.length ? `<ul class="plain">${L.adjustments.map(a => `<li><b>${num(a.delta) > 0 ? '+' : ''}${hrs(a.delta)}h</b> ${esc(a.reason)} <span class="muted">${esc(showDT(a.at))}</span></li>`).join('')}</ul>` : '';
+  if (!active) return `<div class="private dw-sec">${head}<p class="hint">已結案，不再計入量能。${total ? `總工時 ${esc(fmtEst(total))}。` : ''}</p>${adjList}</div>`;
+  const sumBox = `<div class="lsum">
+      <div><span>總工時</span><b>${esc(fmtEst(total))}</b></div>
+      <div><span>剩餘</span><b>${j && j.map ? hrs(j.remNow) + 'h' : '—'}</b></div>
+      <div><span>期間</span><b>${j && j.map ? `${esc(showD(j.start))}–${esc(showD(j.end))}` : (x.status === 'Postponed' ? '延後中' : '未排程')}</b></div>
+      <div><span>${esc(w0.label)}</span><b>${hrs(weekHours(j, w0))}h</b></div>
+      <div><span>${esc(w1.label)}</span><b>${hrs(weekHours(j, w1))}h</b></div></div>`;
+  const sugBox = !conf ? `<div class="notice info"><b>系統預估 ${esc(fmtEst(sug.hours))}</b><span>${esc(sug.basis)}</span><button class="btn sm primary" data-act="load-accept" data-h="${sug.hours}">採用</button></div>` : '';
+  const doneBox = L.progress === 100 ? `<div class="notice warn"><b>完成度已回報 100%</b><span>要把這件改為「完成」嗎？</span><button class="btn sm" data-act="load-done">改為完成</button></div>` : '';
+  let editor = '<div class="dw-actions"><button type="button" class="btn sm" data-act="load-edit">更新時程</button></div>';
+  if (S.loadEdit){
+    const base = conf ? num(L.estHours) : sug.hours;
+    const useDays = base >= 8 && Math.abs(base / 4 - Math.round(base / 4)) < 0.01;
+    const defStart = parseD(x.r.briefDate) || (x.r.createdAt ? day0(new Date(x.r.createdAt)) : today0());
+    editor = `<form id="load-form" class="lform" novalidate>
+      <div class="field"><span class="lbl">初估工時（不含調整）</span>
+        <div class="qchips"><button type="button" class="pchip" data-act="lf-quick" data-h="${sug.hours}">建議 ${esc(fmtDays(sug.hours))}</button>${QUICK_EST.map(([l, h]) => `<button type="button" class="pchip" data-act="lf-quick" data-h="${h}">${l}</button>`).join('')}</div>
+        <div class="qty"><input type="number" id="lf-total" min="0" step="0.5" value="${r1(useDays ? base / 8 : base)}" style="width:100px" aria-label="初估工時"><select id="lf-unit" style="width:auto" aria-label="單位"><option value="d" ${useDays ? 'selected' : ''}>天</option><option value="h" ${useDays ? '' : 'selected'}>小時</option></select></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label for="lf-start">開始</label><input type="date" id="lf-start" value="${esc(L.window.start)}"><span class="hint">留空：${esc(showD(defStart))}</span></div>
+        <div class="field"><label for="lf-end">預計做完</label><input type="date" id="lf-end" value="${esc(L.window.end)}"><span class="hint">留空：完稿日 ${esc(showD(x.r.dueDate))}</span></div>
+      </div>
+      <div class="field"><span class="lbl">目前完成度</span>
+        <div class="qchips">${PROGRESS_STEPS.map(p => `<button type="button" class="pchip ${L.progress === p ? 'on' : ''}" data-act="lf-prog" data-p="${p}">${p}%</button>`).join('')}</div>
+        <div class="qty">或直接填剩餘 <input type="number" id="lf-rem" min="0" step="0.5" placeholder="${j && j.map ? hrs(j.remNow) : ''}" style="width:100px" aria-label="剩餘工時"> 小時</div>
+        <span class="hint">擇一回報即可；不回報時，系統依期間平均推算。</span>
+      </div>
+      <div class="row2">
+        <div class="field"><label for="lf-lock0">${esc(w0.label)}要投入（選填）</label><input type="number" id="lf-lock0" min="0" step="0.5" value="${L.alloc[fmtD(w0.mon)] ?? ''}" placeholder="自動 ${hrs(weekHours(j, w0))}"></div>
+        <div class="field"><label for="lf-lock1">${esc(w1.label)}要投入（選填）</label><input type="number" id="lf-lock1" min="0" step="0.5" value="${L.alloc[fmtD(w1.mon)] ?? ''}" placeholder="自動 ${hrs(weekHours(j, w1))}"></div>
+      </div>
+      <span class="hint">填了就固定該週的時數，剩下的工時自動排到其他天；清空恢復自動。</span>
+      <div class="dw-actions"><button type="submit" class="btn primary sm">儲存時程</button><button type="button" class="btn sm" data-act="load-cancel">取消</button></div>
+    </form>`;
+  }
+  const adjBox = `<div class="field"><span class="lbl">工時調整</span>${adjList}
+      <div class="dw-actions"><input type="number" id="lf-adj" step="0.5" placeholder="+4 或 -2" style="width:110px" aria-label="調整時數"> 小時 <select id="lf-adj-reason" style="width:auto" aria-label="調整原因">${ADJ_REASONS.map(r => `<option>${r}</option>`).join('')}</select><button type="button" class="btn sm" data-act="lf-adj-add">加入</button>${L.adjustments.length ? '<button type="button" class="linkbtn" data-act="lf-adj-undo">撤銷最後一筆</button>' : ''}</div>
+      <span class="hint">按「加入」就會儲存；主管只看得到原因與增減，看不到時數。</span></div>`;
+  return `<div class="private dw-sec">${head}${sumBox}${sugBox}${doneBox}${editor}${adjBox}</div>`;
+}
+function refreshLoadCard(){ const el = $('#load-card'); const x = S.drawerId && findRow(S.drawerId); if (el && x) el.innerHTML = loadCardHTML(x); }
+async function saveLoadForm(ev){
+  ev.preventDefault();
+  const id = S.drawerId; const x = id && findRow(id); if (!x) return;
+  const L = normLoad(S.load.get(id));
+  const v = num($('#lf-total').value, 0); const est = $('#lf-unit').value === 'd' ? v * 8 : v;
+  if (!(est > 0)){ toast('請填寫初估工時'); return; }
+  const C = capData(); const wk0 = fmtD(C.weeks[0].mon), wk1 = fmtD(C.weeks[1].mon);
+  const alloc = {...L.alloc};
+  [[wk0, '#lf-lock0'], [wk1, '#lf-lock1']].forEach(([k, sel]) => { const val = $(sel).value; if (val === '') delete alloc[k]; else alloc[k] = Math.max(0, num(val)); });
+  const patch = {estHours:r1(est), window:{start:$('#lf-start').value || '', end:$('#lf-end').value || ''}, alloc};
+  const total = Math.max(0, est + adjSum(L)); const form = $('#load-form'); const remIn = $('#lf-rem').value;
+  if (remIn !== ''){ const rem = Math.max(0, num(remIn)); Object.assign(patch, {remaining:r1(rem), remainingAt:fmtD(today0()), remainingTs:new Date().toISOString(), progress:total ? Math.max(0, Math.min(100, Math.round((1 - rem / total) * 100))) : null}); }
+  else if (form.dataset.p !== undefined && form.dataset.p !== ''){ const p = num(form.dataset.p); Object.assign(patch, {progress:p, remaining:r1(total * (1 - p / 100)), remainingAt:fmtD(today0()), remainingTs:new Date().toISOString()}); }
+  if (await writeLoad(id, patch)){ S.loadEdit = false; toast('已儲存時程'); refreshLoadCard(); }
+}
+
+/* 評估模式：逐件確認系統預估的時數 */
+function triageQueue(){
+  const C = capData();
+  return allJobs(C).filter(j => !j.confirmed && j.x).sort((a, b) => String(a.due || '9').localeCompare(String(b.due || '9'))).map(j => j.id);
+}
+function triageSetup(){
+  const T = S.triage; const id = T.ids[T.i]; const x = findRow(id); if (!x) return;
+  const C = capData(); const j = allJobs(C).find(o => o.id === id);
+  const L = normLoad(S.load.get(id));
+  T.sug = j && j.liveSuggest ? j.liveSuggest : (num(L.suggestHours) > 0 ? {hours:num(L.suggestHours), basis:L.suggestBasis || ''} : suggestFor(x, C.learned));
+  T.sel = T.sug.hours; T.start = L.window.start || ''; T.end = L.window.end || '';
+}
+function startTriage(){
+  const ids = triageQueue();
+  if (!ids.length){ toast('所有進行中的工作都已確認時數'); return; }
+  S.triage = {ids, i:0, done:0}; triageSetup(); openDrawer(null, 'triage');
+}
+function triageHTML(){
+  const T = S.triage; const id = T && T.ids[T.i]; const x = id && findRow(id);
+  if (!x) return `<div class="dw-head"><h3 id="dw-title">評估時程</h3><button class="btn sm x" data-act="close">關閉</button></div><div class="dw-body"><p class="muted">找不到這件工作。</p></div>`;
+  const r = x.r; const unit = CAT[r.category]?.unit || '件';
+  const lines = Array.isArray(r.items) && r.items.length ? r.items.map(it => [it.name, it.size, it.qty ? '×' + it.qty : ''].filter(Boolean).join(' ')) : String(r.specs || '').split(/\n+/).filter(Boolean);
+  const spec = lines.slice(0, 4).map(esc).join('<br>') + (lines.length > 4 ? `<br><span class="muted">…等 ${lines.length} 項</span>` : '');
+  const before = capData(), after = capData({id, patch:{estHours:T.sel, window:{start:T.start, end:T.end}}});
+  const pv = after.weeks.map((w, i) => `<div class="pv"><span style="min-width:72px">${esc(w.label)}</span>${bandChip(before.weeks[i].band)}<span aria-hidden="true">→</span>${bandChip(w.band)}<span class="muted">可承接 ${availLabel(w.avail)}</span></div>`).join('');
+  const defStart = parseD(r.briefDate) || (r.createdAt ? day0(new Date(r.createdAt)) : today0());
+  return `<div class="dw-head"><div style="display:grid;gap:4px;min-width:0"><span class="mono muted" style="font-size:12px">評估時程 · ${T.i + 1} / ${T.ids.length}</span><h3 id="dw-title">${esc(r.title)}</h3><div class="muted" style="font-size:13px">${esc(r.no || x.id)} · ${esc(CAT[r.category]?.zh || '')} · 數量 ${num(r.qty, 1)} ${esc(unit)}${r.planner ? ` · ${esc(r.planner)}` : ''}</div></div><button class="btn sm x" data-act="close">關閉</button></div>
+  <div class="dw-body">
+    <section class="dw-sec"><h4>需求摘要</h4><dl class="kv"><dt>期間</dt><dd>${r.briefDate ? `資料 ${esc(showD(r.briefDate))} → ` : ''}完稿 ${esc(showD(r.dueDate))}${r.leadDays != null ? `　<span class="mono muted">D+${num(r.leadDays)}</span>` : ''}</dd>${spec ? `<dt>規格</dt><dd>${spec}</dd>` : ''}</dl></section>
+    <section class="dw-sec"><h4>預估工時</h4>
+      <div class="sugbox"><span class="muted" style="font-size:12px">系統建議</span><b>${esc(fmtEst(T.sug.hours))}</b><span class="hint">${esc(T.sug.basis)}</span></div>
+      <div class="qchips"><button type="button" class="pchip ${T.sel === T.sug.hours ? 'on' : ''}" data-act="tri-quick" data-h="${T.sug.hours}">採用建議</button>${QUICK_EST.map(([l, h]) => `<button type="button" class="pchip ${T.sel === h && T.sel !== T.sug.hours ? 'on' : ''}" data-act="tri-quick" data-h="${h}">${l}</button>`).join('')}</div>
+      <div class="qty">自訂 <input type="number" id="tri-h" min="0" step="0.5" value="${T.sel}" style="width:100px" aria-label="預估小時"> 小時（${esc(fmtDays(T.sel))}）</div>
+      <div class="row2">
+        <div class="field"><label for="tri-start">開始</label><input type="date" id="tri-start" value="${esc(T.start)}"><span class="hint">留空：${esc(showD(defStart))}</span></div>
+        <div class="field"><label for="tri-end">預計做完</label><input type="date" id="tri-end" value="${esc(T.end)}"><span class="hint">留空：完稿日</span></div>
+      </div>
+    </section>
+    <section class="dw-sec"><h4>排入後的負載 <span class="muted" style="font-size:12px;font-weight:500">目前以系統預估計入 → 採用這個時數後</span></h4><div class="preview">${pv}</div></section>
+    <div class="dw-actions"><button type="button" class="btn primary" data-act="tri-save">儲存並下一件（Enter）</button><button type="button" class="btn" data-act="tri-skip">略過</button><span class="grow"></span><button type="button" class="linkbtn" data-act="tri-end">結束</button></div>
   </div>`;
 }
-function readLoadFields(x, newStatus){
-  const L = S.load.get(x.id) || {};
-  const est = num($('#l-days')?.value, 0) * 8 + num($('#l-hours')?.value, 0);
-  const adjustments = [...(L.adjustments || []), ...(S.pendingAdj || [])];
-  let startDate = ($('#l-start')?.value || '').trim();
-  if (!startDate && newStatus === 'On going' && !L.startDate) startDate = fmtD(today0());
-  if (!est && !adjustments.length && !S.load.has(x.id)) return null;
-  return {estHours:est, adjustments, startDate:startDate || L.startDate || ''};
+async function triageAdvance(save){
+  const T = S.triage; if (!T) return;
+  const id = T.ids[T.i];
+  if (save){
+    const hi = $('#tri-h'); if (hi && hi.value !== '') T.sel = Math.max(0, num(hi.value));
+    if (!(T.sel > 0)){ toast('請填寫預估時數'); return; }
+    if (!(await writeLoad(id, {estHours:r1(T.sel), window:{start:T.start || '', end:T.end || ''}}))) return;
+    T.done++;
+  }
+  T.i++;
+  while (T.i < T.ids.length && !findRow(T.ids[T.i])) T.i++;
+  if (T.i >= T.ids.length){ const n = T.done; S.triage = null; closeDrawer(); toast(n ? `已確認 ${n} 件時數` : '已結束評估'); renderCurrent(); return; }
+  triageSetup(); renderDrawer();
+}
+function estTag(x){
+  if (!isActive(x.status) || x.status === 'Postponed') return '';
+  const L = S.load.get(x.id);
+  if (L && isConfirmed(normLoad(L))) return `<span class="tag">${esc(fmtDays(effTotal(L)))}</span>`;
+  return '<span class="tag est">系統預估</span>';
 }
 
 /* ---------------- KPI ---------------- */
@@ -2040,7 +2387,10 @@ function kpiCompute(p){
   });
   const wsum = inds.filter(o => o.ach != null).reduce((s, o) => s + o.weight, 0);
   const score = wsum > 0 ? inds.filter(o => o.ach != null).reduce((s, o) => s + o.weight * o.ach, 0) / wsum * 100 : null;
-  return {p, ps, pe, inP, done, timed, manualN, late, excused, onTimeRate, satisfaction, rated, points, revisions, urgent, superN, off, changes, avgLead, hours, months, cats, planners:[...pl.values()].sort((a,b) => b.n - a.n), inds, score};
+  const estDone = done.reduce((s, x) => s + (S.load.has(x.id) ? effTotal(S.load.get(x.id)) : 0), 0);
+  const adjBy = {}; let adjUp = 0;
+  for (const [, L0] of S.load) for (const a of normLoad(L0).adjustments){ const d = parseD(String(a.at || '').slice(0, 10)); if (d && d >= ps && d <= pe){ const v = num(a.delta); adjBy[a.reason || '其他'] = (adjBy[a.reason || '其他'] || 0) + v; if (v > 0) adjUp += v; } }
+  return {estDone, adjBy, adjUp, p, ps, pe, inP, done, timed, manualN, late, excused, onTimeRate, satisfaction, rated, points, revisions, urgent, superN, off, changes, avgLead, hours, months, cats, planners:[...pl.values()].sort((a,b) => b.n - a.n), inds, score};
 }
 function summaryText(K){
   const topCat = [...K.cats].sort((a,b) => b.n - a.n)[0];
@@ -2052,6 +2402,7 @@ function summaryText(K){
   if (K.satisfaction != null) lines.push(`需求者平均滿意度 ${K.satisfaction.toFixed(2)} / 5（${K.rated.length} 件評分）。`);
   if (K.revisions != null) lines.push(`平均修改 ${K.revisions.toFixed(1)} 次${K.changes ? `，製作期間需求變更 ${K.changes} 次` : ''}。`);
   if (K.avgLead != null) lines.push(`平均製作 ${K.avgLead.toFixed(1)} 個工作天。`);
+  if (K.estDone){ const ups = Object.entries(K.adjBy).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]); lines.push(`結案工作預估工時合計 ${r1(K.estDone)} 小時${ups.length ? `，製作期間因${ups.map(([k, v]) => `${k} +${r1(v)}h`).join('、')}而增加` : ''}。`); }
   if (K.score != null) lines.push(`綜合 KPI 分數 ${K.score.toFixed(1)} / 100。`);
   return lines.join('\n');
 }
@@ -2127,6 +2478,8 @@ function renderKpi(){
       <div class="sbox"><span>需求變更次數</span><b>${K.changes}</b></div>
       <div class="sbox"><span>平均製作工作天</span><b>${K.avgLead == null ? '—' : K.avgLead.toFixed(1)}</b></div>
       ${K.manualN ? `<div class="sbox"><span>自行登錄</span><b>${K.manualN}</b></div>` : ''}
+      ${K.estDone ? `<div class="sbox"><span>結案預估工時</span><b>${r1(K.estDone)}<small class="muted" style="font-size:13px;font-weight:500"> h</small></b></div>` : ''}
+      ${K.adjUp ? `<div class="sbox"><span>調整增加工時</span><b>+${r1(K.adjUp)}<small class="muted" style="font-size:13px;font-weight:500"> h</small></b></div>` : ''}
       ${K.hours ? `<div class="sbox"><span>記錄工時</span><b>${r1(K.hours)}<small class="muted" style="font-size:13px;font-weight:500"> 小時</small></b></div>` : ''}
     </div>
     <div class="charts">
@@ -2384,16 +2737,37 @@ document.addEventListener('click', ev => {
   }
   if (act === 'open'){ if (ev.target.closest('select')) return; openDrawer(a.dataset.id); }
   else if (act === 'close'){ S.pendingAdj = []; closeDrawer(); }
-  else if (act === 'l-adj-add'){
-    const dlt = num($('#l-adj').value, 0); if (!dlt){ toast('請輸入要增加或減少的時數'); return; }
-    S.pendingAdj = [...(S.pendingAdj || []), {delta:dlt, reason:$('#l-adj-reason').value, at:new Date().toISOString()}];
-    $('#l-adj').value = ''; S.drawerDirty = true;
-    const x = findRow(S.drawerId); const L = (x && S.load.get(x.id)) || {}; const base = num($('#l-days').value, 0) * 8 + num($('#l-hours').value, 0);
-    const box = a.closest('.field'); const ul = box.querySelector('ul.plain') || (() => { const u = document.createElement('ul'); u.className = 'plain'; box.querySelector('.hint')?.replaceWith(u); return u; })();
-    ul.insertAdjacentHTML('beforeend', `<li><b>${dlt > 0 ? '+' : ''}${hrs(dlt)}h</b> ${esc($('#l-adj-reason').value)} <span class="muted">待儲存</span></li>`);
-    const tot = $('.js-ltotal'); if (tot) tot.textContent = fmtEst(estTotal({estHours:base, adjustments:[...(L.adjustments || []), ...S.pendingAdj]}));
+  else if (act === 'triage-open') startTriage();
+  else if (act === 'tri-quick'){ if (S.triage){ S.triage.sel = num(a.dataset.h); renderDrawer(); } }
+  else if (act === 'tri-save') triageAdvance(true);
+  else if (act === 'tri-skip') triageAdvance(false);
+  else if (act === 'tri-end') closeDrawer();
+  else if (act === 'load-edit'){ S.loadEdit = true; refreshLoadCard(); }
+  else if (act === 'load-cancel'){ S.loadEdit = false; refreshLoadCard(); }
+  else if (act === 'load-accept'){ writeLoad(S.drawerId, {estHours:num(a.dataset.h)}).then(ok => { if (ok){ toast('已採用建議時數'); refreshLoadCard(); } }); }
+  else if (act === 'load-done'){ const id = S.drawerId; quickStatus(id, 'Done').then(() => renderDrawer()); }
+  else if (act === 'lf-quick'){ const h = num(a.dataset.h); const useDays = h >= 8 && Math.abs(h / 4 - Math.round(h / 4)) < 0.01; $('#lf-total').value = r1(useDays ? h / 8 : h); $('#lf-unit').value = useDays ? 'd' : 'h'; }
+  else if (act === 'lf-prog'){ const f = $('#load-form'); if (f){ f.dataset.p = a.dataset.p; $$('[data-act="lf-prog"]', f).forEach(b => b.classList.toggle('on', b === a)); $('#lf-rem').value = ''; } }
+  else if (act === 'lf-adj-add'){
+    const dlt = num($('#lf-adj').value, 0); if (!dlt){ toast('請輸入要增加或減少的時數，例如 +4 或 -2'); return; }
+    const L = normLoad(S.load.get(S.drawerId));
+    writeLoad(S.drawerId, {adjustments:[...L.adjustments, {delta:r1(dlt), reason:$('#lf-adj-reason').value, at:new Date().toISOString()}]}).then(ok => { if (ok){ toast('已加入調整'); refreshLoadCard(); } });
   }
-  else if (act === 'lv-add'){ const d = $('#lv-date').value; if (!parseD(d)){ toast('請選擇日期'); return; } writeLoadConf({leaves:[...(S.loadconf.leaves || []), {date:d, hours:num($('#lv-hours').value, 8)}]}).then(ok => ok && toast('已登記請假')); }
+  else if (act === 'lf-adj-undo'){ const L = normLoad(S.load.get(S.drawerId)); writeLoad(S.drawerId, {adjustments:L.adjustments.slice(0, -1)}).then(ok => { if (ok){ toast('已撤銷最後一筆調整'); refreshLoadCard(); } }); }
+  else if (act === 'cap-prog') setProgress(a.dataset.id, num(a.dataset.p));
+  else if (act === 'cap-open') openDrawer(a.dataset.id);
+  else if (act === 'cap-day'){ S.capDay = S.capDay === a.dataset.ds ? null : a.dataset.ds; renderCapacity(); }
+  else if (act === 'cap-confirm') writeLoadConf({confirmedAt:new Date().toISOString()}).then(ok => { if (ok){ toast('已確認本週量能，主管會看到確認時間'); renderCapacity(); } });
+  else if (act === 'sg-save'){ const tbl = {}; $$('[data-sg]').forEach(i => { if (i.value !== '') tbl[i.dataset.sg] = Math.max(0, num(i.value)); }); writeLoadConf({suggest:tbl}).then(ok => ok && toast('已儲存建議工時，未確認的案件會重新預抓')); }
+  else if (act === 'sg-reset') writeLoadConf({suggest:{}}).then(ok => ok && toast('已恢復預設建議工時'));
+  else if (act === 'lv-add'){
+    const a1 = parseD($('#lv-date').value); if (!a1){ toast('請選擇請假日期'); return; }
+    let a2 = parseD($('#lv-date2').value) || a1; let s1 = a1; if (a2 < s1){ const tmp = s1; s1 = a2; a2 = tmp; }
+    const days = workdaysIn(s1, a2); if (!days.length){ toast('這段期間沒有工作天'); return; }
+    const h = num($('#lv-hours').value, 8); const list = (S.loadconf.leaves || []).filter(l => !days.includes(l.date));
+    days.forEach(ds => list.push({date:ds, hours:h}));
+    writeLoadConf({leaves:list}).then(ok => ok && toast(`已登記 ${days.length} 天請假`));
+  }
   else if (act === 'lv-del'){ const d = a.dataset.date, h = a.dataset.h; const list = [...(S.loadconf.leaves || [])]; const i = list.findIndex(l => l.date === d && String(l.hours) === h); if (i >= 0) list.splice(i, 1); writeLoadConf({leaves:list}); }
   else if (act === 'lv-meet'){ writeLoadConf({meetingHours:Math.max(0, num($('#lv-meet').value, 4))}).then(ok => ok && toast('已儲存')); }
   else if (act === 'busy-sync') syncAllBusy();
@@ -2439,8 +2813,11 @@ document.addEventListener('click', ev => {
 });
 document.addEventListener('change', ev => {
   const t = ev.target;
-  if (t.dataset && t.dataset.capOv){ const L = S.load.get(t.dataset.capOv) || {}; const ov = {...(L.overrides || {})}; if (t.value === '') delete ov[t.dataset.wk]; else ov[t.dataset.wk] = Math.max(0, num(t.value)); writeLoad(t.dataset.capOv, {overrides:ov}); return; }
-  if (t.dataset && t.dataset.capEst){ const id = t.dataset.capEst; const row = t.closest('tr'); const dd = num($('[data-unit="d"]', row).value, 0), hh = num($('[data-unit="h"]', row).value, 0); if (dd || hh) writeLoad(id, {estHours:dd * 8 + hh, startDate:(S.load.get(id) || {}).startDate || ''}).then(ok => ok && toast('已儲存時程')); return; }
+  if (t.dataset && t.dataset.capRem){ if (t.value !== '') setRemaining(t.dataset.capRem, num(t.value)).then(() => { t.blur(); renderCapacity(); }); return; }
+  if (t.dataset && t.dataset.capLock){ const id = t.dataset.capLock; const L = normLoad(S.load.get(id)); const alloc = {...L.alloc}; if (t.value === '') delete alloc[t.dataset.week]; else alloc[t.dataset.week] = Math.max(0, num(t.value)); writeLoad(id, {alloc}).then(ok => { if (ok){ toast('已更新投入時數'); t.blur(); renderCapacity(); } }); return; }
+  if (t.id === 'tri-h'){ if (S.triage){ S.triage.sel = Math.max(0, num(t.value)); renderDrawer(); } return; }
+  if (t.id === 'tri-start' || t.id === 'tri-end'){ if (S.triage){ S.triage[t.id === 'tri-start' ? 'start' : 'end'] = t.value; renderDrawer(); } return; }
+  if (t.id === 'd-needest'){ S.desk.needEst = t.checked; renderDesk(); return; }
   if (t.id === 'wk-fri'){ if (parseD(t.value)) { S.weekFri = t.value; renderWeekly(); } return; }
   if (t.dataset && t.dataset.wk){ saveWeekly(t.dataset.id, {[t.dataset.f]: t.value.trim()}); return; }
   if (t.matches('select[data-act="quick-status"]')){ quickStatus(t.dataset.id, t.value); return; }
@@ -2469,7 +2846,7 @@ document.addEventListener('input', ev => {
   if (t.id === 'f-qty') t.dataset.touched = '1';
   if (t.id === 'b-q'){ S.board.q = t.value.trim(); renderBoard(); }
   if (t.id === 'd-q'){ S.desk.q = t.value.trim(); renderDesk(); }
-  if (t.closest('#drawer')) S.drawerDirty = true;
+  if (t.closest('#drawer') && !t.closest('#load-card') && S.drawerMode !== 'triage') S.drawerDirty = true;
   if (t.closest('#setup-form')) $('#setup-form').dataset.dirty = '1';
   if (t.closest('#v-kpi .js-conf')) $('#v-kpi .js-conf').dataset.dirty = '1';
 });
@@ -2478,11 +2855,17 @@ document.addEventListener('submit', ev => {
   else if (ev.target.id === 'edit-form') saveEdit(ev);
   else if (ev.target.id === 'own-form') saveOwner(ev);
   else if (ev.target.id === 'man-form') saveManual(ev);
+  else if (ev.target.id === 'load-form') saveLoadForm(ev);
   else if (ev.target.id === 'setup-form') saveSetup(ev);
   else ev.preventDefault();
 });
 document.addEventListener('keydown', ev => {
   if (ev.key === 'Escape' && !$('#drawer').hidden){ closeDrawer(); return; }
+  if (ev.key === 'Enter' && !ev.isComposing && S.drawerMode === 'triage' && !$('#drawer').hidden && !ev.target.matches('button, textarea, a')){
+    ev.preventDefault();
+    if (ev.target.id === 'tri-start' || ev.target.id === 'tri-end') S.triage[ev.target.id === 'tri-start' ? 'start' : 'end'] = ev.target.value;
+    triageAdvance(true); return;
+  }
   if (ev.key === 'Enter' && !ev.isComposing && ev.target.closest && ev.target.closest('.it-row')){
     ev.preventDefault();
     const row = ev.target.closest('.it-row'); const box = row.closest('.items');
@@ -2493,6 +2876,7 @@ document.addEventListener('keydown', ev => {
   if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.matches('.row[data-act="open"]')){ ev.preventDefault(); openDrawer(ev.target.dataset.id); }
 });
 $('#scrim').addEventListener('click', closeDrawer);
+document.addEventListener('toggle', ev => { if (ev.target && ev.target.id === 'cap-conf') S.capConfOpen = ev.target.open; }, true);
 // chart tooltip
 const tip = $('#tip');
 document.addEventListener('pointermove', ev => {
@@ -2539,11 +2923,11 @@ async function boot(){
     onData();
   }, onErr);
   if (S.isOwner || S.isManager){
-    db.collection('load').onSnapshot(snap => { S.load = new Map(snap.docs.map(d => [d.id, d.data()])); onData(); }, onErr);
-    db.doc('loadconf/main').onSnapshot(snap => { if (snap.exists) S.loadconf = {meetingHours:4, leaves:[], ...snap.data()}; onData(); }, onErr);
+    db.collection('load').onSnapshot(snap => { S.load = new Map(snap.docs.map(d => [d.id, d.data()])); S.loaded.load = true; onData(); }, onErr);
+    db.doc('loadconf/main').onSnapshot(snap => { if (snap.exists) S.loadconf = {meetingHours:4, leaves:[], ...snap.data()}; S.loaded.loadconf = true; onData(); }, onErr);
   }
   if (S.isOwner){
-    db.collection('kpi').onSnapshot(snap => { S.kpi = new Map(snap.docs.map(d => [d.id, d.data()])); onData(); }, onErr);
+    db.collection('kpi').onSnapshot(snap => { S.kpi = new Map(snap.docs.map(d => [d.id, d.data()])); S.loaded.kpi = true; onData(); }, onErr);
     db.doc('kpiconf/main').onSnapshot(snap => {
       if (snap.exists){ const c = snap.data(); S.kpiconf = {targets:{...DEFAULT_KPICONF.targets, ...(c.targets || {})}, points:{...DEFAULT_KPICONF.points, ...(c.points || {})}, difficulty:{...DEFAULT_KPICONF.difficulty, ...(c.difficulty || {})}}; fillConf(); }
       onData();
