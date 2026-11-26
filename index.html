@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='100 32 190 320'><path fill='%23111' fill-rule='evenodd' d='M120 112A75 70 0 0 1 195 42A75 70 0 0 1 270 112V218H185V290H270V342H185A65 65 0 0 1 120 277ZM185 190V106A14 14 0 0 1 213 106V190Z'/></svg>">
 <title>商發部設計需求單</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -59,7 +60,8 @@ button{font:inherit;color:inherit}
 .top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--surface);border-bottom:1px solid var(--line)}
 .top-in{display:flex;align-items:center;gap:12px 20px;padding-block:10px;flex-wrap:wrap}
 .brand{display:flex;align-items:center;gap:12px;min-width:0}
-.cmyk{display:grid;grid-template-columns:repeat(2,9px);gap:2px;flex:none}
+.logo{display:block;height:34px;width:auto;flex:none;color:var(--ink)}
+.gate-card .logo{height:44px}
 .cmyk i{display:block;width:9px;height:9px;border-radius:2px}
 .brand h1{font-family:var(--f-display);font-size:17px;font-weight:800;letter-spacing:.02em}
 .brand small{display:block;color:var(--ink-3);font-size:12px;line-height:1.3}
@@ -365,7 +367,7 @@ html.gated body>header,html.gated body>main{display:none}
 <header class="top">
   <div class="wrap top-in">
     <div class="brand">
-      <div class="cmyk" aria-hidden="true"><i style="background:var(--c)"></i><i style="background:var(--m)"></i><i style="background:var(--y)"></i><i style="background:var(--ink)"></i></div>
+      <svg class="logo" viewBox="120 42 150 300" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" d="M120 112A75 70 0 0 1 195 42A75 70 0 0 1 270 112V218H185V290H270V342H185A65 65 0 0 1 120 277ZM185 190V106A14 14 0 0 1 213 106V190Z"/></svg>
       <div><h1>商發部設計需求單</h1><small id="brand-sub">視覺設計需求窗口</small></div>
     </div>
     <nav class="tabs" id="tabs" aria-label="頁面"></nav>
@@ -417,7 +419,7 @@ const FIREBASE_CONFIG = {
   const wrapErr = e => ({code: mapCode(e && e.code), message: (e && e.message) || ''});
   function gate(title, msg){
     const g = document.createElement('div'); g.className = 'gate';
-    g.innerHTML = '<div class="gate-card"><div class="cmyk" aria-hidden="true"><i style="background:var(--c)"></i><i style="background:var(--m)"></i><i style="background:var(--y)"></i><i style="background:var(--ink)"></i></div><h2></h2><p></p></div>';
+    g.innerHTML = '<div class="gate-card"><svg class="logo" viewBox="120 42 150 300" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" d="M120 112A75 70 0 0 1 195 42A75 70 0 0 1 270 112V218H185V290H270V342H185A65 65 0 0 1 120 277ZM185 190V106A14 14 0 0 1 213 106V190Z"/></svg><h2></h2><p></p></div>';
     g.querySelector('h2').textContent = title; g.querySelector('p').textContent = msg;
     const mount = () => { document.body.appendChild(g); document.documentElement.classList.add('gated'); };
     if (document.body) mount(); else document.addEventListener('DOMContentLoaded', mount);
@@ -801,7 +803,8 @@ function renderCurrent(){
 }
 function onData(){
   renderNav(); renderNotices();
-  if (S.view === 'new') patchForm(); else renderCurrent();
+  if (S.view === 'new'){ patchForm(); renderPresets(); } else renderCurrent();
+  refreshItemNames();
   if (S.drawerId && !S.drawerDirty) renderDrawer();
 }
 
@@ -1157,13 +1160,37 @@ function linkListHTML(list){
 
 /* ---------------- spec items ---------------- */
 const PRESET_CH = p => p[0] === 'IG' && /限時動態/.test(p[1]) ? ['IG','FB'] : [p[0]];
+// Size presets: maintained in 設定 (settings.presets), falling back to the built-in list.
+function getPresets(){
+  const sp = S.settings.presets;
+  if (Array.isArray(sp) && sp.length) return sp.filter(x => x && x.name && x.size).map(x => [Array.isArray(x.ch) ? x.ch : [String(x.ch || '其他')], x.name, x.size]);
+  return PRESETS.map(x => [PRESET_CH(x), x[1], x[2]]);
+}
+const presetsText = list => list.map(x => `${x[0].join('/')} | ${x[1]} | ${x[2]}`).join('\n');
+function parsePresets(text){
+  const out = [], bad = [];
+  String(text).split(/\n+/).map(l => l.trim()).filter(Boolean).forEach(l => {
+    const parts = l.split(/\s*[|｜\t]\s*/);
+    if (parts.length < 3){ bad.push(l); return; }
+    const ch = parts[0].split(/[\/／、,，]/).map(c => c.trim()).filter(Boolean);
+    const size = normSize(parts.slice(2).join(' '));
+    if (!ch.length || !parts[1] || !size){ bad.push(l); return; }
+    out.push({ch, name:parts[1].trim(), size});
+  });
+  return {out, bad};
+}
+function refreshItemNames(){
+  const names = [...new Set(getPresets().map(p => p[1]).concat(['APP 蓋版廣告','LINE 推播圖','LINE Rich Menu','票券縮圖','商品說明圖','電子看板']))];
+  let dl = $('#item-names'); if (!dl){ dl = document.createElement('datalist'); dl.id = 'item-names'; document.body.appendChild(dl); }
+  dl.innerHTML = names.map(n => `<option value="${esc(n)}"></option>`).join('');
+}
 function renderPresets(){
   const box = $('#v-new .js-presets'); if (!box) return;
   const chosen = $$('#f-channels input:checked').map(i => i.value);
   if (!chosen.length){ box.innerHTML = `<span class="hint">先選上方的版位，這裡會列出該版位的常用尺寸。</span>`; return; }
   const seen = new Set(); const groups = []; const none = [];
   for (const ch of chosen){
-    const items = PRESETS.map((x, i) => [x, i]).filter(([x, i]) => PRESET_CH(x).includes(ch) && !seen.has(i));
+    const items = getPresets().map((x, i) => [x, i]).filter(([x, i]) => x[0].includes(ch) && !seen.has(i));
     items.forEach(([, i]) => seen.add(i));
     if (items.length) groups.push(`<div class="pgroup"><span class="pg-l">${esc(ch)}</span><div class="presets">${items.map(([x, i]) => `<button type="button" class="preset" data-preset="${i}">${esc(x[1])} <span class="mono">${esc(x[2])}</span></button>`).join('')}</div></div>`);
     else none.push(ch);
@@ -2014,6 +2041,7 @@ function renderSetup(){
           </div>
           <div class="field"><label for="s-companies">業務單位選項</label><textarea id="s-companies" rows="3" placeholder="每行一個"></textarea><span class="hint">表單會自動加上「其他（請輸入）」選項；留空時改成自由填寫。</span></div>
           <div class="field"><label for="s-holidays">國定假日</label><textarea id="s-holidays" rows="6" class="mono" placeholder="每行一個日期，可加說明&#10;2027-01-01 元旦" style="font-size:13px"></textarea><span class="hint">計算 D+n 工作天與收單截止日時會排除這些日期（週末已自動排除）。請依行政院人事行政總處公告的行事曆補齊，補班日目前不另計。</span></div>
+          <div class="field"><label for="s-presets">常用尺寸</label><textarea id="s-presets" rows="10" class="mono" style="font-size:13px" spellcheck="false" placeholder="版位 | 名稱 | 尺寸&#10;官網 | 官網 Banner | 1200×828"></textarea><span class="hint">每行一個：<span class="inline-code">版位 | 名稱 | 尺寸</span>。版位要和表單上的版位選項同名，屬於多個版位用 / 分隔（例：<span class="inline-code">IG/FB | 限時動態 | 1080×1920</span>）。企劃選了版位後，就會出現這裡對應的尺寸。</span><span class="hint js-preset-warn" style="color:var(--crit-ink)"></span></div>
           <div class="field"><label for="s-rules">注意事項</label><textarea id="s-rules" rows="6" placeholder="每行一條"></textarea><span class="hint">每行一條，<span class="inline-code">{approver}</span> 會自動換成特急件同意人。</span></div>
           <div class="dw-actions"><button type="submit" class="btn primary">儲存設定</button></div>
         </form>
@@ -2052,6 +2080,7 @@ function fillSetup(force){
   if (f.dataset.dirty && !force) return;
   const s = S.settings;
   $('#s-designer').value = s.designer || ''; $('#s-approver').value = s.approver || ''; $('#s-cutoff').value = s.cutoff || '16:30';
+  $('#s-presets').value = presetsText(getPresets());
   $('#s-companies').value = (s.companies || []).join('\n'); $('#s-holidays').value = (s.holidays || []).join('\n'); $('#s-rules').value = (s.rules || []).join('\n');
 }
 async function saveSetup(ev){
@@ -2061,7 +2090,12 @@ async function saveSetup(ev){
   const hol = lines('s-holidays');
   const bad = hol.filter(l => !parseD(l.slice(0,10)));
   if (bad.length){ toast(`日期格式需為 YYYY-MM-DD：${bad[0]}`); return; }
-  const s = {designer:$('#s-designer').value.trim(), approver:$('#s-approver').value.trim() || '主管', cutoff:$('#s-cutoff').value || '16:30', companies:lines('s-companies'), holidays:hol.sort(), rules:lines('s-rules')};
+  const pp = parsePresets($('#s-presets').value);
+  const unknown = [...new Set(pp.out.flatMap(x => x.ch).filter(c => !CHANNELS.includes(c)))];
+  const warn = $('.js-preset-warn');
+  if (pp.bad.length){ warn.textContent = `常用尺寸有 ${pp.bad.length} 行格式不對：${pp.bad[0]}`; toast('常用尺寸格式需為「版位 | 名稱 | 尺寸」'); return; }
+  warn.textContent = unknown.length ? `提醒：版位「${unknown.join('、')}」不在表單的版位選項中，這些尺寸不會出現。` : '';
+  const s = {presets:pp.out, designer:$('#s-designer').value.trim(), approver:$('#s-approver').value.trim() || '主管', cutoff:$('#s-cutoff').value || '16:30', companies:lines('s-companies'), holidays:hol.sort(), rules:lines('s-rules')};
   S.settings = {...DEFAULT_SETTINGS, ...s}; refreshHolidays();
   try { await enqueue('settings/main', () => S.db.doc('settings/main').set(s)); delete $('#setup-form').dataset.dirty; toast('已儲存設定'); renderNav(); }
   catch(e){ handleWriteError(e); }
@@ -2135,11 +2169,11 @@ document.addEventListener('click', ev => {
   if (hb){ S.period = {...S.period, h:+hb.dataset.half}; renderKpi(); return; }
   const pr = ev.target.closest('[data-preset]');
   if (pr){
-    const p = PRESETS[+pr.dataset.preset]; const box = $('#f-items'); if (!box) return;
+    const p = getPresets()[+pr.dataset.preset]; const box = $('#f-items'); if (!box || !p) return;
     const rowsEl = $$('.it-row', box); let row = rowsEl[rowsEl.length - 1];
     if (!row || $('.it-name', row).value.trim() || $('.it-size', row).value.trim()) row = addItemRow(box);
     $('.it-name', row).value = p[1]; $('.it-size', row).value = p[2];
-    const ch = $$('#f-channels input').find(i => i.value === p[0]); if (ch) ch.checked = true;
+    const chs = $$('#f-channels input'); if (!chs.some(i => i.checked && p[0].includes(i.value))){ const ch = chs.find(i => p[0].includes(i.value)); if (ch) ch.checked = true; }
     $('.it-qty', row).focus();
     patchStub(); saveDraft(); return;
   }
@@ -2218,7 +2252,7 @@ document.addEventListener('change', ev => {
   if (t.closest('#f-channels')) renderPresets();
   if (t.classList && t.classList.contains('it-name')){
     const row = t.closest('.it-row'); const sz = row && $('.it-size', row);
-    if (sz && !sz.value.trim()){ const hits = [...new Set(PRESETS.filter(x => x[1] === t.value.trim()).map(x => x[2]))]; if (hits.length === 1) sz.value = hits[0]; }
+    if (sz && !sz.value.trim()){ const hits = [...new Set(getPresets().filter(x => x[1] === t.value.trim()).map(x => x[2]))]; if (hits.length === 1) sz.value = hits[0]; }
   }
   if (t.closest('#req-form')){ patchStub(); saveDraft(); }
 });
@@ -2267,7 +2301,7 @@ setInterval(() => { if (S.view === 'new') patchStub(); }, 60000);
 /* ---------------- boot ---------------- */
 async function boot(){
   refreshHolidays();
-  document.body.insertAdjacentHTML('beforeend', `<datalist id="item-names">${[...new Set(PRESETS.map(p => p[1]).concat(['APP 蓋版廣告','LINE 推播圖','LINE Rich Menu','票券縮圖','商品說明圖','電子看板']))].map(n => `<option value="${esc(n)}"></option>`).join('')}</datalist>`);
+  refreshItemNames();
   setView(location.hash.slice(1), true);
   const use = name => (window.claude && typeof window.claude.use === 'function') ? window.claude.use(name).catch(() => null) : Promise.resolve(null);
   const [db, user, downloads] = await Promise.all([use('db'), use('user'), use('downloads')]);
