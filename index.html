@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'><path fill='%23231815' fill-rule='evenodd' d='M200 0A200 200 0 1 1 200 400A200 200 0 1 1 200 0ZM265.5,323.2h-67.6c-35-.3-63.6-26.3-63.8-57.9v-129.4c.2-32.7,29.7-59.2,65.7-59.2s65.5,26.6,65.7,59.2v75.4s0,3.6,0,3.6h-80.6v50.3c0,17.2,15.6,31,34.7,31,0,0,0,0,.2,0h25.2s16.9,0,16.9,0h3.6v26.9ZM184.9,188h29.8v-72.6c0-7.2-6.7-13.1-14.9-13.1s-14.9,5.9-14.9,13.1v72.6Z'/></svg>"><path fill='%23111' fill-rule='evenodd' d='M120 112A75 70 0 0 1 195 42A75 70 0 0 1 270 112V218H185V290H270V342H185A65 65 0 0 1 120 277ZM185 190V106A14 14 0 0 1 213 106V190Z'/></svg>">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Cpath fill='%23231815' fill-rule='evenodd' d='M200 0A200 200 0 1 1 200 400A200 200 0 1 1 200 0ZM265.5,323.2h-67.6c-35-.3-63.6-26.3-63.8-57.9v-129.4c.2-32.7,29.7-59.2,65.7-59.2s65.5,26.6,65.7,59.2v75.4s0,3.6,0,3.6h-80.6v50.3c0,17.2,15.6,31,34.7,31,0,0,0,0,.2,0h25.2s16.9,0,16.9,0h3.6v26.9ZM184.9,188h29.8v-72.6c0-7.2-6.7-13.1-14.9-13.1s-14.9,5.9-14.9,13.1v72.6Z'/%3E%3C/svg%3E">
 <title>商發部設計需求單</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -253,6 +253,26 @@ table.wk textarea,table.wk select,table.wk input{font-size:13px;padding:5px 7px;
 table.wk textarea{min-width:140px;resize:vertical;line-height:1.5}
 table.wk td:nth-child(1) select{width:96px}
 table.wk td:nth-child(6) select{width:112px}
+.capgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.capcell{border-radius:14px;padding:18px 20px;display:grid;gap:4px;border:1px solid var(--line)}
+.capcell b{font-size:40px;line-height:1.1;font-weight:800;font-family:var(--f-display)}
+.cap-k{font-size:13px;font-weight:700;opacity:.85}
+.cap-d,.cap-h{font-size:13px;opacity:.85}
+.strip2{display:grid;gap:12px}
+.strip-w{display:grid;grid-template-columns:44px minmax(0,1fr);gap:10px;align-items:center}
+.strip-d{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.dcell{border-radius:8px;padding:8px;display:grid;gap:2px;font-size:12px;border:1px solid var(--line);min-width:0}
+.dcell b{font-size:15px}
+.dcell small{font-size:11px;opacity:.85}
+.dcell.off{background:var(--surface-2);color:var(--ink-3);border-style:dashed}
+.legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:12px;font-size:12px;color:var(--ink-2)}
+.legend .lg{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:18px;height:12px;border-radius:3px;border:1px solid var(--line)}
+.sharebar{display:block;width:120px;height:8px;border-radius:999px;background:var(--grid);overflow:hidden}
+.sharebar i{display:block;height:100%;background:var(--st-crit);border-radius:999px}
+input.cap-ov{width:84px;padding:4px 8px;font-size:13px}
+ul.plain{list-style:none;margin:0;padding:0;display:grid;gap:6px;font-size:14px}
+@media (max-width:640px){ .capgrid{grid-template-columns:minmax(0,1fr)} .strip-w{grid-template-columns:minmax(0,1fr)} .dcell b{font-size:13px} .dcell{padding:6px} }
 /* drawer */
 .scrim{position:fixed;inset:0;background:color-mix(in srgb,#000 45%,transparent);z-index:40}
 .drawer{position:fixed;top:0;right:0;bottom:0;width:min(580px,100%);background:var(--surface);z-index:41;overflow-y:auto;box-shadow:var(--shadow);display:grid;align-content:start}
@@ -383,6 +403,7 @@ html.gated body>header,html.gated body>main{display:none}
   <section id="v-desk" class="view" hidden></section>
   <section id="v-kpi" class="view" hidden></section>
   <section id="v-weekly" class="view" hidden></section>
+  <section id="v-capacity" class="view" hidden></section>
   <section id="v-setup" class="view" hidden></section>
 </main>
 
@@ -438,7 +459,9 @@ const FIREBASE_CONFIG = {
       if (e && e.code === 'permission-denied'){ try { localStorage.removeItem('dr.key'); } catch(_){}; gate('連結無效或已更換', '這個連結的金鑰不正確，或設計窗口已更換金鑰。請向設計窗口索取最新的連結。'); return null; }
     }
     let owner = false;
-    if (!auth.currentUser.isAnonymous){ try { await fs.doc(base + 'kpiconf/main').get(); owner = true; } catch(e){} }
+    let manager = false;
+    if (!auth.currentUser.isAnonymous){ try { await fs.doc(base + 'kpiconf/main').get(); owner = true; } catch(e){}
+      if (!owner){ try { await fs.doc(base + 'loadconf/main').get(); manager = true; } catch(e){} } }
     const wrapDoc = ref => ({
       id: ref.id, path: ref.path,
       get: () => ref.get().catch(e => { throw wrapErr(e); }),
@@ -472,7 +495,7 @@ const FIREBASE_CONFIG = {
       },
     };
     const user = {
-      isOwner: async () => owner, canEdit: async () => owner, can: async () => true,
+      isOwner: async () => owner, isManager: async () => manager, canEdit: async () => owner, can: async () => true,
       id: async () => auth.currentUser ? auth.currentUser.uid : null,
       me: async () => ({id: auth.currentUser.uid, name: auth.currentUser.displayName || '', email: null, isOwner: owner, canEdit: owner, avatarUrl: '', color: '#888'}),
       profiles: async ids => Object.fromEntries([].concat(ids).map(i => [i, {id: i, name: '', avatarUrl: '', color: '#888', email: null, isMe: false, guest: false, roles: null}])),
@@ -485,7 +508,7 @@ const FIREBASE_CONFIG = {
         setTimeout(() => URL.revokeObjectURL(url), 3000);
       },
     };
-    return {db, user, downloads, auth, owner, key: KEY};
+    return {db, user, downloads, auth, owner, manager, key: KEY};
   })();
   window.DR = {
     ready,
@@ -575,7 +598,7 @@ const URG = {
 };
 const DELAY = {'':'—（準時或未延遲）', requester:'需求端資料延遲', designer:'設計端', force:'不可抗力／需求變更'};
 const DIFF = {easy:'簡單', normal:'標準', hard:'複雜'};
-const VIEWS = ['new','board','desk','weekly','kpi','setup'];
+const VIEWS = ['new','board','desk','weekly','capacity','kpi','setup'];
 const OWNER_VIEWS = ['desk','weekly','kpi','setup'];
 const DEFAULT_SETTINGS = {
   designer:'', approver:'婷婷', cutoff:'16:30', companies:[], holidays:[],
@@ -716,7 +739,7 @@ function rulesText(){ return (S.settings.rules || []).map(r => String(r).replace
 const S = {
   db:null, user:null, downloads:null, uid:null, isOwner:false, canWrite:null, readOnly:false,
   identityKnown:false, conn:'loading', loaded:{requests:false, track:false},
-  requests:new Map(), track:new Map(), kpi:new Map(), busy:new Map(),
+  requests:new Map(), track:new Map(), kpi:new Map(), busy:new Map(), load:new Map(), loadconf:{meetingHours:4, leaves:[]}, isManager:false, pendingAdj:[],
   settings:{...DEFAULT_SETTINGS}, kpiconf:structuredClone(DEFAULT_KPICONF),
   view:null, demo:false, demoData:null,
   board:{status:'active', mine:false, q:'', sort:null}, desk:{status:'active', q:'', sort:null},
@@ -765,13 +788,15 @@ function handleWriteError(e){
 /* ---------------- nav & notices ---------------- */
 function renderNav(){
   const tabs = [['new','填寫需求'],['board','進度看板']];
-  if (S.isOwner) tabs.push(['desk','工作台'],['weekly','週報'],['kpi','KPI 結算'],['setup','設定']);
+  if (S.isOwner) tabs.push(['desk','工作台'],['weekly','週報'],['capacity','量能'],['kpi','KPI 結算'],['setup','設定']);
+  else if (S.isManager) tabs.push(['capacity','量能']);
   $('#tabs').innerHTML = tabs.map(([v, l]) =>
-    `<button class="tab" data-view="${v}" ${S.view === v ? 'aria-current="page"' : ''}>${esc(l)}${OWNER_VIEWS.includes(v) ? '<span class="lk">僅你</span>' : ''}</button>`).join('');
+    `<button class="tab" data-view="${v}" ${S.view === v ? 'aria-current="page"' : ''}>${esc(l)}${OWNER_VIEWS.includes(v) ? '<span class="lk">僅你</span>' : v === 'capacity' && S.isOwner ? '<span class="lk">主管</span>' : ''}</button>`).join('');
   const who = $('#who');
   if (S.conn === 'none') who.innerHTML = '未連線';
   else if (!S.identityKnown) who.textContent = '連線中…';
   else if (S.isOwner) who.innerHTML = '身分：<b>設計窗口（你）</b>';
+  else if (S.isManager) who.innerHTML = '身分：<b>主管</b>';
   else if (S.readOnly || S.canWrite === false) who.innerHTML = '身分：<b>僅檢視</b>';
   else who.innerHTML = '身分：<b>需求者</b>';
   $('#brand-sub').textContent = S.settings.designer ? `設計窗口：${S.settings.designer}` : '視覺設計需求窗口';
@@ -786,8 +811,9 @@ function renderNotices(){
   $('#notices').hidden = n.length === 0;
 }
 function setView(v, fromHash){
-  if (!VIEWS.includes(v)) v = S.identityKnown && S.isOwner ? 'desk' : 'new';
+  if (!VIEWS.includes(v)) v = S.identityKnown && S.isOwner ? 'desk' : S.identityKnown && S.isManager ? 'capacity' : 'new';
   if (OWNER_VIEWS.includes(v) && S.identityKnown && !S.isOwner) v = 'board';
+  if (v === 'capacity' && S.identityKnown && !S.isOwner && !S.isManager) v = 'board';
   S.view = v;
   if (!fromHash && location.hash !== '#' + v) { try { history.replaceState(null, '', '#' + v); } catch(e){ location.hash = v; } }
   for (const x of VIEWS) $('#v-' + x).hidden = x !== v;
@@ -806,6 +832,7 @@ function renderCurrent(){
   else if (v === 'kpi') renderKpi();
   else if (v === 'setup') renderSetup();
   else if (v === 'weekly') renderWeekly();
+  else if (v === 'capacity'){ if (S.isOwner || S.isManager) renderCapacity(); else $('#v-capacity').innerHTML = `<div class="card empty"><b>確認身分中…</b><span>這一頁只有設計窗口與主管看得到。</span></div>`; }
 }
 function onData(){
   renderNav(); renderNotices();
@@ -1355,20 +1382,20 @@ async function quickStatus(id, st){
   const x = findRow(id);
   if (x && x.manual){
     const doc = {...x.k, status:st}; if (st === 'Done' && !doc.deliveredDate) doc.deliveredDate = fmtD(today0());
-    if (await writeManual(id, doc)) toast(`已改為「${STATUS[st].zh}」`); else renderCurrent();
+    if (await writeManual(id, doc)){ toast(`已改為「${STATUS[st].zh}」`); if (S.load.has(id)) writeLoad(id, st === 'On going' && !S.load.get(id).startDate ? {startDate:fmtD(today0())} : {}); } else renderCurrent();
     return;
   }
   const patch = {status:st};
   const prev = S.track.get(id) || {};
   if (st === 'Done' && !prev.deliveredDate) patch.deliveredDate = fmtD(today0());
   const ok = await writeTrack(id, patch);
-  if (ok){ if (st === 'Done') await writeKpi(id, {}); toast(`已改為「${STATUS[st].zh}」`); }
+  if (ok){ if (st === 'Done') await writeKpi(id, {}); toast(`已改為「${STATUS[st].zh}」`); if (S.load.has(id)) writeLoad(id, st === 'On going' && !S.load.get(id).startDate ? {startDate:fmtD(today0())} : {}); }
   else renderCurrent();
 }
 
 /* ---------------- DRAWER ---------------- */
 function openDrawer(id, mode='view'){
-  S.drawerId = id; S.drawerMode = mode; S.drawerDirty = false; S.armedDelete = false;
+  S.drawerId = id; S.drawerMode = mode; S.drawerDirty = false; S.armedDelete = false; S.pendingAdj = [];
   $('#scrim').hidden = false; $('#drawer').hidden = false; document.body.style.overflow = 'hidden';
   renderDrawer();
   setTimeout(() => $('#drawer .x')?.focus(), 0);
@@ -1510,6 +1537,7 @@ function ownerDrawer(x){
     <div class="field"><label for="o-reply">給企劃的回覆</label><textarea id="o-reply" rows="2" placeholder="例：初稿 12/2 提供，需補商品去背圖">${esc(t.reply || '')}</textarea></div>
     <div class="field"><label for="o-link">交件位置</label><textarea id="o-link" rows="2" class="mono" style="font-size:13px" spellcheck="false" placeholder="網芳路徑或雲端連結，多個位置請換行&#10;例：\\\\everrich.net\\nas14\\…\\@完稿">${esc(t.deliverLink || '')}</textarea></div>
 
+    ${loadFieldsHTML(x)}
     ${kpiFieldsHTML(r, k, late)}
     <div class="dw-actions"><button type="submit" class="btn primary">儲存</button><span class="grow"></span>
       <button type="button" class="btn danger ${S.armedDelete ? 'armed' : ''}" data-act="delete">${S.armedDelete ? '確定刪除？再按一次' : '刪除這張需求'}</button></div>
@@ -1529,7 +1557,8 @@ async function saveOwner(ev){
   const kpiPatch = readKpiFields();
   const ok1 = x.gone ? true : await writeTrack(x.id, trackPatch);
   const ok2 = await writeKpi(x.id, kpiPatch);
-  if (ok1 && ok2){ S.drawerDirty = false; toast('已儲存'); renderDrawer(); }
+  const lp = readLoadFields(x, st); const ok3 = lp ? await writeLoad(x.id, lp) : true;
+  if (ok1 && ok2 && ok3){ S.pendingAdj = []; S.drawerDirty = false; toast('已儲存'); renderDrawer(); }
 }
 async function deleteReq(id){
   if (writeBlocked()) return;
@@ -1626,6 +1655,7 @@ function manualForm(x){
       <div class="field"><label for="m-delivered">完成日</label><input type="date" id="m-delivered" value="${esc(k.deliveredDate || '')}"></div>
     </div>
     <label class="check"><input type="checkbox" id="m-public" ${k.hidePublic ? '' : 'checked'}><span>在進度看板公開（只顯示名稱、類別、業務單位、日期與狀態）</span></label>
+    ${x ? loadFieldsHTML(x) : ''}
     ${kpiFieldsHTML(r, k, late)}
     <div class="dw-actions"><button type="submit" class="btn primary">儲存</button><span class="grow"></span>${x ? `<button type="button" class="btn danger ${S.armedDelete ? 'armed' : ''}" data-act="delete">${S.armedDelete ? '確定刪除？再按一次' : '刪除這筆紀錄'}</button>` : ''}</div>
   </form>`;
@@ -1644,7 +1674,9 @@ async function saveManual(ev){
   const snapshot = {no:ps.no || id, title, proposal:'', company:v('m-bu'), category:v('m-cat'), channels:ps.channels || [], qty:Math.max(1, Math.round(num(v('m-qty'), 1))),
     planner:v('m-planner'), briefDate:'', dueDate:v('m-due'), launchDate:'', createdAt:ps.createdAt || new Date().toISOString(), urgency:null, leadDays:null, offSchedule:false, rating:null, edits:0};
   const doc = {...prev, source:prev.source || 'manual', status:st, stage:v('m-stage'), deliveredDate:delivered, hidePublic:!$('#m-public')?.checked, snapshot, ...readKpiFields()};
-  if (await writeManual(id, doc)){ S.drawerId = id; S.drawerMode = 'view'; S.drawerDirty = false; toast('已儲存'); renderDrawer(); renderCurrent(); }
+  if (await writeManual(id, doc)){
+    const x2 = findRow(id); const lp = x2 && $('#l-days') ? readLoadFields(x2, st) : null; if (lp) await writeLoad(id, lp);
+    S.pendingAdj = []; S.drawerId = id; S.drawerMode = 'view'; S.drawerDirty = false; toast('已儲存'); renderDrawer(); renderCurrent(); }
 }
 function hash5(str){ let h = 0x811c9dc5; for (const ch of str){ h ^= ch.codePointAt(0); h = Math.imul(h, 16777619) >>> 0; } return h.toString(36).toUpperCase().padStart(5, '0').slice(-5); }
 function parseLog(text, year){
@@ -1807,6 +1839,149 @@ async function weeklyCSV(){
   const head = ['工作類型','項目名稱','內容簡述','本週進度（如需討論可放連結）','卡點／需協助事項','目前狀態','預計完成日','下週預計完成事項'];
   const csv = '﻿' + [head, ...weeklyMatrix()].map(r => r.map(cell).join(',')).join('\r\n');
   try { await S.downloads.save({filename:`週報_${S.weekFri.replaceAll('-', '')}.csv`, data:new Blob([csv], {type:'text/csv'})}); } catch(e){ if (e && e.code !== 'declined') toast('下載失敗'); }
+}
+
+/* ---------------- CAPACITY (owner + manager) ---------------- */
+const LOAD_BANDS = [
+  {max:0.4,  zh:'低',   pct:10},
+  {max:0.6,  zh:'中低', pct:22},
+  {max:0.75, zh:'中',   pct:36},
+  {max:0.9,  zh:'中高', pct:52},
+  {max:1.0001, zh:'高', pct:70},
+  {max:Infinity, zh:'過載', pct:92},
+];
+const ADJ_REASONS = ['需求變更','修改次數增加','資料延遲','評估誤差','其他'];
+const bandOf = ratio => LOAD_BANDS.find(b => ratio < b.max) || LOAD_BANDS[LOAD_BANDS.length - 1];
+const bandStyle = b => `background:color-mix(in srgb, var(--st-crit) ${b.pct}%, var(--surface));color:${b.pct >= 66 ? '#fff' : 'var(--ink)'}`;
+const estTotal = L => Math.max(0, num(L && L.estHours) + ((L && L.adjustments) || []).reduce((a, x) => a + num(x.delta), 0));
+const hrs = n => (Math.round(n * 10) / 10).toString();
+const fmtEst = h => { h = num(h); if (!h) return '—'; const d = Math.floor(h / 8), r = r1(h - d * 8); return [d ? d + ' 天' : '', r ? r + ' 小時' : ''].filter(Boolean).join(' ') + `（${hrs(h)}h）`; };
+const monOf = d => addDays(day0(d), -((d.getDay() + 6) % 7));
+const leaveHours = ds => ((S.loadconf && S.loadconf.leaves) || []).filter(l => l.date === ds).reduce((a, l) => a + num(l.hours), 0);
+function dayCap(d){
+  if (!isWorkday(d)) return 0;
+  const wd = [0,1,2,3,4].map(i => addDays(monOf(d), i)).filter(isWorkday).length || 1;
+  return Math.max(0, 8 - num(S.loadconf.meetingHours, 4) / wd - leaveHours(fmtD(d)));
+}
+function loadJobs(){
+  const t = today0(), mon = monOf(t), fri = addDays(mon, 4);
+  const jobs = [], unscheduled = [], paused = [];
+  for (const [id, L] of S.load){
+    const req = S.requests.get(id), tr = S.track.get(id), kp = S.kpi.get(id), bz = S.busy.get(id);
+    const title = (req && req.title) || (kp && kp.snapshot && kp.snapshot.title) || (bz && bz.title) || L.title || '';
+    const no = (req && req.no) || (kp && kp.snapshot && kp.snapshot.no) || (bz && bz.no) || L.no || id;
+    const due = (req && req.dueDate) || (kp && kp.snapshot && kp.snapshot.dueDate) || (bz && bz.dueDate) || L.dueDate || '';
+    const status = req ? statusOf(req, tr || {}) : kp ? (kp.status || 'Open') : bz ? bz.status : (L.status || 'Open');
+    if (!isActive(status)) continue;
+    const total = estTotal(L); if (!total) continue;
+    const base = {id, no, title, due, status, total, L};
+    if (status === 'Postponed'){ paused.push(base); continue; }
+    const dueD = parseD(due); if (!dueD){ unscheduled.push(base); continue; }
+    let start = parseD(L.startDate) || parseD(req && req.briefDate) || (req && req.createdAt ? day0(new Date(req.createdAt)) : null) || t;
+    if (start > dueD) start = dueD;
+    const days = []; for (let d = new Date(start), g = 0; d <= dueD && g < 800; d = addDays(d, 1), g++) if (isWorkday(d)) days.push(fmtD(d));
+    if (!days.length) days.push(fmtD(dueD));
+    const per = total / days.length; const map = {};
+    days.forEach(ds => { map[ds] = per; });
+    if (dueD < t){ for (let d = new Date(t); d <= fri; d = addDays(d, 1)) if (isWorkday(d)) map[fmtD(d)] = per; }
+    for (const [wk, h] of Object.entries(L.overrides || {})){
+      const wm = parseD(wk); if (!wm || h === '' || h == null) continue;
+      const wdays = [0,1,2,3,4].map(i => addDays(wm, i)).filter(isWorkday).map(fmtD);
+      wdays.forEach(ds => { delete map[ds]; }); wdays.forEach(ds => { map[ds] = num(h) / (wdays.length || 1); });
+    }
+    jobs.push({...base, map, overdue:dueD < t});
+  }
+  return {jobs, unscheduled, paused};
+}
+function capWeeks(){
+  const t = today0(); const m0 = monOf(t);
+  const {jobs, unscheduled, paused} = loadJobs();
+  const weeks = [m0, addDays(m0, 7)].map(mon => {
+    const days = [0,1,2,3,4].map(i => { const d = addDays(mon, i), ds = fmtD(d); const cap = dayCap(d); const load = jobs.reduce((a, j) => a + (j.map[ds] || 0), 0); return {d, ds, cap, load, holiday:!isWorkday(d), leave:leaveHours(ds)}; });
+    const cap = days.reduce((a, x) => a + x.cap, 0), load = days.reduce((a, x) => a + x.load, 0);
+    const perJob = jobs.map(j => ({j, h:days.reduce((a, x) => a + (j.map[x.ds] || 0), 0)})).filter(x => x.h > 0.01);
+    return {mon, days, cap, load, ratio: cap ? load / cap : (load ? 9 : 0), perJob};
+  });
+  return {weeks, jobs, unscheduled, paused};
+}
+function renderCapacity(){
+  const sec = $('#v-capacity'); const owner = S.isOwner;
+  const ae = document.activeElement; if (ae && sec.contains(ae) && /INPUT|SELECT/.test(ae.tagName)) return;
+  const C = capWeeks();
+  const last = [...S.load.values()].map(L => L.updatedAt || '').concat([S.loadconf.updatedAt || '']).sort().pop();
+  const wkLabel = w => `${showD(w.mon)} – ${showD(addDays(w.mon, 4))}`;
+  const big = (w, name) => { const b = bandOf(w.ratio); return `<div class="capcell" style="${bandStyle(b)}"><span class="cap-k">${name}</span><b>${b.zh}</b><span class="cap-d">${esc(wkLabel(w))}</span>${owner ? `<span class="cap-h">已排 ${hrs(w.load)}h ／ 可用 ${hrs(w.cap)}h</span>` : ''}</div>`; };
+  const strip = C.weeks.map((w, wi) => `<div class="strip-w"><span class="cap-k">${wi ? '下週' : '本週'}</span><div class="strip-d">${w.days.map(x => { if (x.holiday) return `<div class="dcell off"><span>${WK[x.d.getDay()]} ${x.d.getMonth()+1}/${x.d.getDate()}</span><b>假日</b></div>`; const b = bandOf(x.cap ? x.load / x.cap : (x.load ? 9 : 0)); return `<div class="dcell" style="${bandStyle(b)}" title="${owner ? `${hrs(x.load)}h / ${hrs(x.cap)}h` : b.zh}"><span>${WK[x.d.getDay()]} ${x.d.getMonth()+1}/${x.d.getDate()}</span><b>${x.cap ? b.zh : '請假'}</b>${x.leave ? `<small>請假 ${hrs(x.leave)}h</small>` : ''}</div>`; }).join('')}</div></div>`).join('');
+  const ids = [...new Set(C.weeks.flatMap(w => w.perJob.map(x => x.j.id)))];
+  const jobRows = ids.map(id => C.jobs.find(j => j.id === id)).sort((a, b) => (a.due || '').localeCompare(b.due || '')).map(j => {
+    const cells = C.weeks.map(w => { const pj = w.perJob.find(x => x.j.id === j.id); const h = pj ? pj.h : 0; const wk = fmtD(w.mon); const ov = (j.L.overrides || {})[wk];
+      if (owner) return `<td class="n"><input type="number" min="0" step="0.5" class="cap-ov" data-cap-ov="${esc(j.id)}" data-wk="${wk}" value="${ov ?? ''}" placeholder="${hrs(h)}" aria-label="${esc(j.title)} ${wk} 時數"></td>`;
+      const share = w.cap ? Math.min(1, h / w.cap) : 0; return `<td><span class="sharebar" aria-label="佔用比例"><i style="width:${(share * 100).toFixed(0)}%"></i></span></td>`; }).join('');
+    return `<tr><td><b>${esc(j.title)}</b><div class="mono muted" style="font-size:11px">${esc(j.no)}</div></td><td style="white-space:nowrap">${esc(showD(j.due))}${j.overdue ? ' <span class="tag warn">逾期</span>' : ''}</td><td>${statusPill(j.status)}</td>${owner ? `<td class="n">${hrs(j.total)}h</td>` : ''}${cells}</tr>`;
+  }).join('');
+  const missing = owner ? allRows(true).filter(x => !x.gone && isActive(x.status) && x.status !== 'Postponed' && !estTotal(S.load.get(x.id))) : [];
+  const legend = LOAD_BANDS.map(b => `<span class="lg"><i style="${bandStyle(b)}"></i>${b.zh}</span>`).join('');
+  sec.innerHTML = `
+    <div class="page-head"><div><h2>量能</h2><p class="sub">本週與下週的設計負載，以區間粗估是否過載。可用時數 = 工作天 × 8 小時，扣除國定假日、每週例行會議 ${hrs(num(S.loadconf.meetingHours, 4))} 小時與請假。${last ? `最後更新：${esc(showDT(last))}` : ''}</p></div>
+      ${owner ? '<span class="tag">主管只看得到區間，看不到時數</span>' : ''}</div>
+    <div class="capgrid">${big(C.weeks[0], '本週')}${big(C.weeks[1], '下週')}</div>
+    <div class="card"><h3 style="font-size:15px;margin-bottom:10px">逐日負載</h3><div class="strip2">${strip}</div><div class="legend">${legend}</div></div>
+    <div style="display:grid;gap:10px"><h3 style="font-size:15px">這兩週的工作 <span class="muted" style="font-size:12px;font-weight:500">${owner ? '時數依開始日到完稿日平均分攤；需要時可直接改某週時數，清空恢復自動' : '條狀為佔該週可用時間的比例'}</span></h3>
+      <div class="tablewrap"><table style="min-width:640px"><thead><tr><th>工作</th><th>完稿日</th><th>狀態</th>${owner ? '<th class="n">總工時</th>' : ''}<th${owner ? ' class="n"' : ''}>本週</th><th${owner ? ' class="n"' : ''}>下週</th></tr></thead><tbody>${jobRows || `<tr><td colspan="6"><div class="empty"><b>這兩週沒有排入的工作</b>${owner ? '<span>在工作台案件裡填「預估時程」後，就會出現在這裡。</span>' : ''}</div></td></tr>`}</tbody></table></div></div>
+    ${C.paused.length || C.unscheduled.length ? `<div class="twocol">
+      ${C.paused.length ? `<div class="card"><h3 style="font-size:15px">暫停計入（延後）</h3><ul class="plain">${C.paused.map(j => `<li>${esc(j.title)}</li>`).join('')}</ul></div>` : '<div></div>'}
+      ${C.unscheduled.length ? `<div class="card"><h3 style="font-size:15px">未排程（沒有完稿日）</h3><ul class="plain">${C.unscheduled.map(j => `<li>${esc(j.title)}${owner ? ` <span class="muted">${hrs(j.total)}h</span>` : ''}</li>`).join('')}</ul></div>` : ''}</div>` : ''}
+    ${owner ? `
+    <div class="card"><h3 style="font-size:15px">尚未填預估時程（${missing.length} 件）</h3><p class="hint" style="margin:4px 0 10px">進行中的工作要填時程才會計入量能。填天數或小時（1 天 = 8 小時），填完按 Enter 或移開即儲存。</p>
+      ${missing.length ? `<div class="tablewrap" style="border:0"><table style="min-width:520px"><tbody>${missing.slice(0, 40).map(x => `<tr><td>${esc(x.r.title)}<div class="mono muted" style="font-size:11px">${esc(x.r.no || x.id)} · 完稿 ${esc(showD(x.r.dueDate))}</div></td><td style="white-space:nowrap"><input type="number" min="0" step="0.5" class="cap-ov" data-cap-est="${esc(x.id)}" data-unit="d" placeholder="天" aria-label="天"> 天 <input type="number" min="0" step="0.5" class="cap-ov" data-cap-est="${esc(x.id)}" data-unit="h" placeholder="小時" aria-label="小時"> 小時</td></tr>`).join('')}</tbody></table></div>` : '<p class="muted" style="font-size:13px">全部都填好了。</p>'}</div>
+    <div class="twocol">
+      <div class="card"><h3 style="font-size:15px">請假登記</h3><p class="hint" style="margin:4px 0 10px">登記後當天可用時數自動扣除，主管只會看到該日「請假」。</p>
+        <div class="dw-actions"><input type="date" id="lv-date" style="width:auto"><select id="lv-hours" style="width:auto"><option value="8">整天 8h</option><option value="4">半天 4h</option><option value="2">2h</option><option value="1">1h</option></select><button class="btn sm" data-act="lv-add">新增</button></div>
+        <ul class="plain" style="margin-top:10px">${((S.loadconf.leaves || []).filter(l => l.date >= fmtD(addDays(today0(), -14))).sort((a, b) => a.date.localeCompare(b.date)).map(l => `<li>${esc(showD(l.date))} 請假 ${hrs(l.hours)}h <button class="linkbtn" data-act="lv-del" data-date="${esc(l.date)}" data-h="${esc(l.hours)}">刪除</button></li>`).join('')) || '<li class="muted">目前沒有登記</li>'}</ul></div>
+      <div class="card"><h3 style="font-size:15px">每週例行會議</h3><p class="hint" style="margin:4px 0 10px">每週固定扣除的時數，國定假日那週也照扣。</p>
+        <div class="dw-actions"><input type="number" id="lv-meet" min="0" step="0.5" value="${num(S.loadconf.meetingHours, 4)}" style="width:90px"> 小時／週 <button class="btn sm" data-act="lv-meet">儲存</button></div></div>
+    </div>` : ''}`;
+}
+async function writeLoad(id, patch){
+  if (writeBlocked()) return false;
+  const x = findRow(id); const prev = S.load.get(id) || {};
+  const snap = x ? {no:x.r.no || id, title:x.r.title || '', dueDate:x.r.dueDate || '', category:x.r.category || '', status:x.status} : {};
+  const doc = {adjustments:[], overrides:{}, ...prev, ...snap, ...patch, updatedAt:new Date().toISOString()};
+  S.load.set(id, doc);
+  try { await enqueue('load/' + id, () => S.db.doc('load/' + id).set(doc)); return true; }
+  catch(e){ handleWriteError(e); return false; }
+}
+async function writeLoadConf(patch){
+  if (writeBlocked()) return false;
+  const doc = {meetingHours:4, leaves:[], ...S.loadconf, ...patch, updatedAt:new Date().toISOString()};
+  S.loadconf = doc;
+  try { await enqueue('loadconf/main', () => S.db.doc('loadconf/main').set(doc)); return true; }
+  catch(e){ handleWriteError(e); return false; }
+}
+function loadFieldsHTML(x){
+  const L = (x && S.load.get(x.id)) || {}; const base = num(L.estHours); const d = Math.floor(base / 8), h = r1(base - d * 8);
+  const adj = [...(L.adjustments || []), ...(S.pendingAdj || [])];
+  return `<div class="private dw-sec">
+    <h4>預估時程（量能） <span class="tag">主管只看得到區間</span></h4>
+    <div class="row2">
+      <div class="field"><span class="lbl">初估時程</span><div class="qty"><input type="number" id="l-days" min="0" step="0.5" value="${base ? d : ''}" placeholder="0" style="width:80px"> 天 <input type="number" id="l-hours" min="0" step="0.5" value="${base && h ? h : ''}" placeholder="0" style="width:80px"> 小時</div><span class="hint">1 天 = 8 小時。</span></div>
+      <div class="field"><label for="l-start">開始日</label><input type="date" id="l-start" value="${esc(L.startDate || '')}"><span class="hint">留空時用資料提供日；改成「進行中」時自動填今天。</span></div>
+    </div>
+    <div class="field"><span class="lbl">調整紀錄</span>
+      ${adj.length ? `<ul class="plain">${adj.map(a => `<li><b>${num(a.delta) > 0 ? '+' : ''}${hrs(num(a.delta))}h</b> ${esc(a.reason)} <span class="muted">${esc(showDT(a.at))}</span></li>`).join('')}</ul>` : '<span class="hint">尚無調整</span>'}
+      <div class="dw-actions"><input type="number" id="l-adj" step="0.5" placeholder="+4 或 -2" style="width:110px"> 小時 <select id="l-adj-reason" style="width:auto">${ADJ_REASONS.map(r => `<option>${r}</option>`).join('')}</select><button type="button" class="btn sm" data-act="l-adj-add">加入調整</button></div>
+      <span class="hint">目前總工時：<b class="js-ltotal">${fmtEst(estTotal({estHours:base, adjustments:adj}))}</b>　調整會在按「儲存」後生效。</span>
+    </div>
+  </div>`;
+}
+function readLoadFields(x, newStatus){
+  const L = S.load.get(x.id) || {};
+  const est = num($('#l-days')?.value, 0) * 8 + num($('#l-hours')?.value, 0);
+  const adjustments = [...(L.adjustments || []), ...(S.pendingAdj || [])];
+  let startDate = ($('#l-start')?.value || '').trim();
+  if (!startDate && newStatus === 'On going' && !L.startDate) startDate = fmtD(today0());
+  if (!est && !adjustments.length && !S.load.has(x.id)) return null;
+  return {estHours:est, adjustments, startDate:startDate || L.startDate || ''};
 }
 
 /* ---------------- KPI ---------------- */
@@ -2208,7 +2383,19 @@ document.addEventListener('click', ev => {
     return;
   }
   if (act === 'open'){ if (ev.target.closest('select')) return; openDrawer(a.dataset.id); }
-  else if (act === 'close') closeDrawer();
+  else if (act === 'close'){ S.pendingAdj = []; closeDrawer(); }
+  else if (act === 'l-adj-add'){
+    const dlt = num($('#l-adj').value, 0); if (!dlt){ toast('請輸入要增加或減少的時數'); return; }
+    S.pendingAdj = [...(S.pendingAdj || []), {delta:dlt, reason:$('#l-adj-reason').value, at:new Date().toISOString()}];
+    $('#l-adj').value = ''; S.drawerDirty = true;
+    const x = findRow(S.drawerId); const L = (x && S.load.get(x.id)) || {}; const base = num($('#l-days').value, 0) * 8 + num($('#l-hours').value, 0);
+    const box = a.closest('.field'); const ul = box.querySelector('ul.plain') || (() => { const u = document.createElement('ul'); u.className = 'plain'; box.querySelector('.hint')?.replaceWith(u); return u; })();
+    ul.insertAdjacentHTML('beforeend', `<li><b>${dlt > 0 ? '+' : ''}${hrs(dlt)}h</b> ${esc($('#l-adj-reason').value)} <span class="muted">待儲存</span></li>`);
+    const tot = $('.js-ltotal'); if (tot) tot.textContent = fmtEst(estTotal({estHours:base, adjustments:[...(L.adjustments || []), ...S.pendingAdj]}));
+  }
+  else if (act === 'lv-add'){ const d = $('#lv-date').value; if (!parseD(d)){ toast('請選擇日期'); return; } writeLoadConf({leaves:[...(S.loadconf.leaves || []), {date:d, hours:num($('#lv-hours').value, 8)}]}).then(ok => ok && toast('已登記請假')); }
+  else if (act === 'lv-del'){ const d = a.dataset.date, h = a.dataset.h; const list = [...(S.loadconf.leaves || [])]; const i = list.findIndex(l => l.date === d && String(l.hours) === h); if (i >= 0) list.splice(i, 1); writeLoadConf({leaves:list}); }
+  else if (act === 'lv-meet'){ writeLoadConf({meetingHours:Math.max(0, num($('#lv-meet').value, 4))}).then(ok => ok && toast('已儲存')); }
   else if (act === 'busy-sync') syncAllBusy();
   else if (act === 'copy-share') copyText(window.DR.shareLink(a.dataset.view));
   else if (act === 'backup-export') exportBackup();
@@ -2252,6 +2439,8 @@ document.addEventListener('click', ev => {
 });
 document.addEventListener('change', ev => {
   const t = ev.target;
+  if (t.dataset && t.dataset.capOv){ const L = S.load.get(t.dataset.capOv) || {}; const ov = {...(L.overrides || {})}; if (t.value === '') delete ov[t.dataset.wk]; else ov[t.dataset.wk] = Math.max(0, num(t.value)); writeLoad(t.dataset.capOv, {overrides:ov}); return; }
+  if (t.dataset && t.dataset.capEst){ const id = t.dataset.capEst; const row = t.closest('tr'); const dd = num($('[data-unit="d"]', row).value, 0), hh = num($('[data-unit="h"]', row).value, 0); if (dd || hh) writeLoad(id, {estHours:dd * 8 + hh, startDate:(S.load.get(id) || {}).startDate || ''}).then(ok => ok && toast('已儲存時程')); return; }
   if (t.id === 'wk-fri'){ if (parseD(t.value)) { S.weekFri = t.value; renderWeekly(); } return; }
   if (t.dataset && t.dataset.wk){ saveWeekly(t.dataset.id, {[t.dataset.f]: t.value.trim()}); return; }
   if (t.matches('select[data-act="quick-status"]')){ quickStatus(t.dataset.id, t.value); return; }
@@ -2327,14 +2516,15 @@ async function boot(){
   if (user){
     const [own, id, cw] = await Promise.all([user.isOwner(), user.id(), user.can('data.write')]);
     S.isOwner = !!own; S.uid = id || null; S.canWrite = cw;
+    S.isManager = !S.isOwner && !!(user.isManager && await user.isManager());
   }
   S.identityKnown = true;
   (async () => { const r = window.DR && await window.DR.ready; const b = $('#authbtn'); if (!r || !b) return;
     const anon = r.auth.currentUser && r.auth.currentUser.isAnonymous;
-    b.hidden = false; b.textContent = anon ? '設計窗口登入' : '登出';
-    b.title = anon ? '用設計窗口的 Google 帳號登入，開啟工作台與 KPI' : '登出 Google 帳號';
+    b.hidden = false; b.textContent = anon ? '登入' : '登出';
+    b.title = anon ? '設計窗口或主管用 Google 帳號登入' : '登出 Google 帳號';
     b.onclick = () => anon ? window.DR.signIn() : window.DR.signOut();
-    if (!anon && !r.owner) toast('這個 Google 帳號不是設計窗口，只能以一般身分使用');
+    if (!anon && !r.owner && !r.manager) toast('這個 Google 帳號沒有設計窗口或主管權限，只能以一般身分使用');
   })();
   if (!db){ S.conn = 'none'; setView(location.hash.slice(1), true); return; }
   S.conn = 'ok';
@@ -2348,6 +2538,10 @@ async function boot(){
     if (snap.exists){ S.settings = {...DEFAULT_SETTINGS, ...snap.data()}; refreshHolidays(); fillSetup(); }
     onData();
   }, onErr);
+  if (S.isOwner || S.isManager){
+    db.collection('load').onSnapshot(snap => { S.load = new Map(snap.docs.map(d => [d.id, d.data()])); onData(); }, onErr);
+    db.doc('loadconf/main').onSnapshot(snap => { if (snap.exists) S.loadconf = {meetingHours:4, leaves:[], ...snap.data()}; onData(); }, onErr);
+  }
   if (S.isOwner){
     db.collection('kpi').onSnapshot(snap => { S.kpi = new Map(snap.docs.map(d => [d.id, d.data()])); onData(); }, onErr);
     db.doc('kpiconf/main').onSnapshot(snap => {
