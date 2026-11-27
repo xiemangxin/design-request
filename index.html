@@ -269,7 +269,7 @@ table.wk td:nth-child(6) select{width:112px}
 .legend .lg{display:inline-flex;align-items:center;gap:6px}
 .legend i{width:18px;height:12px;border-radius:3px;border:1px solid var(--line)}
 .sharebar{display:block;width:120px;height:8px;border-radius:999px;background:var(--grid);overflow:hidden}
-.sharebar i{display:block;height:100%;background:var(--st-crit);border-radius:999px}
+.sharebar i{display:block;height:100%;background:linear-gradient(90deg,var(--ld2),var(--ld5));border-radius:999px}
 input.cap-ov{width:84px;padding:4px 8px;font-size:13px}
 ul.plain{list-style:none;margin:0;padding:0;display:grid;gap:6px;font-size:14px}
 @media (max-width:640px){ .capgrid{grid-template-columns:minmax(0,1fr)} .strip-w{grid-template-columns:minmax(0,1fr)} .dcell b{font-size:13px} .dcell{padding:6px} }
@@ -310,7 +310,7 @@ table.ck td:nth-child(4){min-width:300px}
 @keyframes colUp{from{transform:scaleY(0)}to{transform:scaleY(1)}}
 @keyframes fillUp{from{height:0}}
 @keyframes drift{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-@keyframes breathe{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--st-crit) 0%,transparent)}50%{box-shadow:0 0 0 5px color-mix(in srgb,var(--st-crit) 24%,transparent)}}
+@keyframes breathe{0%,100%{box-shadow:0 6px 18px -14px color-mix(in srgb,var(--ld5) 50%,transparent)}50%{box-shadow:0 14px 32px -16px color-mix(in srgb,var(--ld5) 85%,transparent)}}
 @keyframes pop{0%{transform:scale(.3)}100%{transform:scale(1)}}
 .btn,.tab,.pchip,.chip,.cat,.seg button,.row,.dcell,tbody tr,.linkbtn,.preset{transition:background-color .18s ease,border-color .18s ease,color .18s ease,box-shadow .22s ease,transform .14s ease}
 .btn:active,.pchip:active,.preset:active{transform:translateY(1px)}
@@ -340,9 +340,9 @@ tbody tr:hover{background:color-mix(in srgb,var(--surface-2) 70%,transparent)}
 /* capacity "water level": the share of the week already planned, with a slow drifting crest */
 .capcell{position:relative;overflow:hidden;isolation:isolate}
 .capcell>:not(.level){position:relative;z-index:1}
-.capcell .level{position:absolute;left:0;right:0;bottom:0;height:var(--lv,0%);background:color-mix(in srgb,var(--ink) 9%,transparent);z-index:0;pointer-events:none}
+.capcell .level{position:absolute;left:0;right:0;bottom:0;height:var(--lv,0%);background:color-mix(in srgb,var(--ld5) 30%,transparent);z-index:0;pointer-events:none}
 .capcell .level svg{position:absolute;left:0;bottom:calc(100% - 1px);width:200%;height:10px;display:block;animation:drift 11s linear infinite}
-.capcell .level path{fill:color-mix(in srgb,var(--ink) 9%,transparent)}
+.capcell .level path{fill:color-mix(in srgb,var(--ld5) 30%,transparent)}
 .capcell.over{animation:breathe 3.4s ease-in-out infinite}
 .anim-in .capcell .level{animation:fillUp 1.3s var(--ease-out) both .2s}
 .scrim:not([hidden]){animation:fadeIn .25s ease}
@@ -460,6 +460,10 @@ details.more>summary .muted{font-weight:500;font-size:12px}
 .wk-step.ok .stub-k i{background:var(--st-good)}
 .wk-step p{font-size:13.5px;color:var(--ink-2)}
 @media (max-width:820px){ .wk-steps{grid-template-columns:minmax(0,1fr)} .wk-step{border-right:0;border-bottom:1px solid var(--line)} .wk-step:last-child{border-bottom:0} }
+/* 量能色階：淺 #ffd9df → 深 #f79ba8，帶淡淡的斜向漸層 */
+:root{--ld0:#fff3f5;--ld1:#ffe6ea;--ld2:#ffd9df;--ld3:#fcc4cd;--ld4:#f9b0bb;--ld5:#f79ba8;--ldt0:#3a1f25;--ldt1:#3a1f25;--ldt2:#3a1f25;--ldt3:#3a1f25;--ldt4:#3a1f25;--ldt5:#3a1f25}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){--ld0:#33262a;--ld1:#4a2f36;--ld2:#6b3d48;--ld3:#c97e8c;--ld4:#e08d9c;--ld5:#f79ba8;--ldt0:#f3e4e7;--ldt1:#f3e4e7;--ldt2:#f8eaed;--ldt3:#2a1418;--ldt4:#2a1418;--ldt5:#2a1418;} }
+:root[data-theme="dark"]{--ld0:#33262a;--ld1:#4a2f36;--ld2:#6b3d48;--ld3:#c97e8c;--ld4:#e08d9c;--ld5:#f79ba8;--ldt0:#f3e4e7;--ldt1:#f3e4e7;--ldt2:#f8eaed;--ldt3:#2a1418;--ldt4:#2a1418;--ldt5:#2a1418;}
 .udot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--st-crit);margin-right:7px;vertical-align:middle;position:relative;top:-1px;box-shadow:0 0 0 3px color-mix(in srgb,var(--st-crit) 16%,transparent)}
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
 </style>
@@ -2078,7 +2082,7 @@ const PROGRESS_STEPS = [0, 25, 50, 75, 90, 100];
 const QUICK_EST = [['半天', 4], ['1 天', 8], ['2 天', 16], ['3 天', 24], ['5 天', 40]];
 const AVAIL_LINE = 0.85;
 const bandOf = ratio => LOAD_BANDS.find(b => ratio < b.max) || LOAD_BANDS[LOAD_BANDS.length - 1];
-const bandStyle = b => `background:color-mix(in srgb, var(--st-crit) ${b.pct}%, var(--surface));color:${b.pct >= 66 ? '#fff' : 'var(--ink)'}`;
+const bandStyle = b => { const i = Math.max(0, LOAD_BANDS.indexOf(b)); return `background:linear-gradient(135deg, color-mix(in srgb, var(--ld${i}) 55%, var(--surface)) 0%, var(--ld${i}) 70%);border-color:color-mix(in srgb, var(--ld${i}) 70%, var(--line));color:var(--ldt${i})`; };
 const hrs = n => (Math.round(num(n) * 10) / 10).toString();
 const fmtDays = h => { h = num(h); if (!h) return '—'; return h >= 8 ? `${r1(h / 8)} 天` : `${hrs(h)} 小時`; };
 const fmtEst = h => { h = num(h); if (!h) return '—'; return `${fmtDays(h)}（${hrs(h)}h）`; };
